@@ -15,10 +15,8 @@
 - [Technologies](#technologies)
 - [Documentation](#documentation)
 - [Contributeurs](#contributeurs)
-- [Licence](#licence)
 
 
----
 
 ## À Propos
 
@@ -50,7 +48,7 @@ Les données proviennent de l'**ADEME** (Agence de l'Environnement et de la Maî
 - [API DPE v2 - Logements existants](https://data.ademe.fr/datasets/dpe-v2-logements-existants)
 - [API DPE v2 - Logements neufs](https://data.ademe.fr/datasets/dpe-v2-logements-neufs)
 
----
+
 
 ## Fonctionnalités
 
@@ -67,7 +65,6 @@ Interface type HUD futuriste avec fond personnalisé et charte graphique CSS
 
 - **Filtres multi-critères** : Ville, type de logement , Période de construction, type d'érnergie, étiquette DPE 
 
----
 
 
 ### Niveau Intermédiaire
@@ -93,7 +90,7 @@ Interface type HUD futuriste avec fond personnalisé et charte graphique CSS
 
 ### Structure du Projet
 
-```
+
 │
 ├── app/                              # Code source de l’application Shiny
 │   ├── app.R                         # Fichier principal Shiny
@@ -113,8 +110,8 @@ Interface type HUD futuriste avec fond personnalisé et charte graphique CSS
 │   └── rapport_statistique.html/pdf  # Version "knit" en HTML ou pdf
 |
 ├── docs/                             # Documentation du projet
-│   ├── technical_doc.md              # Documentation technique
-│   └── functional_doc.md             # Documentation fonctionnelle
+│   ├── doc_technique.md              # Documentation technique
+│   └── doc_fonctionnelle.md             # Documentation fonctionnelle
 |
 └── README.md   # README principal du dépôt avec le lien de la vidéo démo et de la démo déployé.
 
