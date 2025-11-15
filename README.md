@@ -96,12 +96,12 @@ Interface type HUD futuriste avec fond personnalisé et charte graphique CSS
 ├── app/                              # Code source de l’application Shiny
 │   ├── app.R                         # Fichier principal Shiny
 │   ├── www/                          
-│   │   ├── logo-ENEDIS.png
-│   │   ├── logo-IUT.png
-│   │   └── logo - Fondécran
+│   │   ├── Enedis.png
+│   │   ├── IUT.png
+│   │   └── Fond d'écran shiny.png
 |
 ├── data/                             # Données locales accessibles à l’app
-│   └── dpe_clean.csv
+│   └── logements_nancy_montpellier.csv
 │
 ├── data_preparation/                 # Scripts de préparation et d’analyse des données
 │   └── extraction_api.R
