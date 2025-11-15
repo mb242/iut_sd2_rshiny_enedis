@@ -34,7 +34,7 @@ rsconnect::setAccountInfo(name='mbahoutche',
 # -------------------------------------------------------------------
 df_nancy <- read.csv2("https://github.com/mb242/iut_sd2_rshiny_enedis/blob/main/data/logements_nancy.csv",
    header = TRUE, fileEncoding = "UTF-8"
- )
+ )   #Lien vers le fichier de données stocké sur GitHub
 
 
 df_montpellier <- read.csv2(
@@ -709,3 +709,4 @@ write.csv(df, "logements_nancy_montpellier.csv.gz")
 # -------------------------------------------------------------------
 
 shinyApp(ui = ui, server = server)
+
