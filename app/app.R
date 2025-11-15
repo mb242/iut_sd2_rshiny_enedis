@@ -32,14 +32,13 @@ rsconnect::setAccountInfo(name='mbahoutche',
 # -------------------------------------------------------------------
 # 1. CHARGEMENT & NETTOYAGE DES DONNEES
 # -------------------------------------------------------------------
-df_nancy <- read.csv2(
-  "C:/Users/2018e/Downloads/test/logements_nancy.csv",
+df_nancy <- read.csv2("https://github.com/mb242/iut_sd2_rshiny_enedis/blob/main/data/logements_nancy.csv",
    header = TRUE, fileEncoding = "UTF-8"
  )
 
 
 df_montpellier <- read.csv2(
-  "C:/Users/2018e/Downloads/test/logements_montpellier.csv",
+  "https://github.com/mb242/iut_sd2_rshiny_enedis/blob/main/data/logements_montpellier.csv",
   header = TRUE, fileEncoding = "UTF-8"
 )
 
@@ -102,7 +101,7 @@ if ("X_geopoint" %in% names(df)) {
 # Expose le dossier images 'test' (logos + fond)
 # -> on met le même "prefix" que ce qui est utilisé dans les paths (test/ia.jpg, test/logo_...)
 
-addResourcePath("test",("C:/Users/2018e/Downloads/test"))
+addResourcePath("www",(" https://github.com/mb242/iut_sd2_rshiny_enedis/blob/main/app/www")) 
 
 
 
@@ -385,13 +384,13 @@ server <- function(input, output, session) {
   
   # --------- Auth ----------
   user_logged <- reactiveVal(FALSE)
-  addResourcePath("test",("C:/Users/2018e/Downloads/test"))
+
   output$login_panel <- renderUI({
     if (isTRUE(user_logged())) return(NULL)
     div(
       class = "login-overlay",
-      tags$img(src = "test/logo_iut.png",    class = "brand-left",  alt = "IUT"),
-      tags$img(src = "test/logo_enedis.png", class = "brand-right", alt = "Enedis"),
+      tags$img(src = "https://github.com/mb242/iut_sd2_rshiny_enedis/blob/main/app/www/logo_iut.jpg",    class = "brand-left",  alt = "IUT"),
+      tags$img(src = "https://github.com/mb242/iut_sd2_rshiny_enedis/blob/main/app/www/logo_enedis.jpg", class = "brand-right", alt = "Enedis"),
         div(class = "auth-card",
             div(class = "auth-hero",
                 span(class = "tag", tagList(icon("bolt"), " OBSERVATOIRE DPE")),
@@ -708,4 +707,5 @@ write.csv(df, "logements_nancy_montpellier.csv.gz")
 # -------------------------------------------------------------------
 # 4. LANCEMENT
 # -------------------------------------------------------------------
+
 shinyApp(ui = ui, server = server)
