@@ -91,6 +91,8 @@ Interface type HUD futuriste avec fond personnalisé et charte graphique CSS
 ### Structure du Projet
 
 
+```
+
 │
 ├── app/                              # Code source de l’application Shiny
 │   ├── app.R                         # Fichier principal Shiny
