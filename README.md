@@ -144,7 +144,7 @@ Interface type HUD futuriste avec fond personnalisé et charte graphique CSS
 
   - Elk-Fred MBAHOUKA
   - Aristide Tchetche
-| - PHAM Thi Cam Tien
+  - PHAM Thi Cam Tien
 ### Client
 
 - **ENEDIS** - Demandeur du projet
