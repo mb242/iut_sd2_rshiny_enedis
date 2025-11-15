@@ -6,15 +6,17 @@
 
 ## Table des Matières
 
-- [À Propos](#-à-propos)
-- [Fonctionnalités](#-fonctionnalités)
-- [Installation](#-installation)
-- [Utilisation](#-utilisation)
-- [Architecture](#-architecture)
-- [Technologies](#-technologies)
-- [Documentation](#-documentation)
-- [Contributeurs](#-contributeurs)
-- [Licence](#-licence)
+- [À Propos](#à-propos)
+- [Fonctionnalités](#fonctionnalités)
+- [Démo](#démo)
+- [Installation](#installation)
+- [Utilisation](#utilisation)
+- [Architecture](#architecture)
+- [Technologies](#technologies)
+- [Documentation](#documentation)
+- [Contributeurs](#contributeurs)
+- [Licence](#licence)
+
 
 ---
 
