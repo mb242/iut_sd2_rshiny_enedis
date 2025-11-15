@@ -32,13 +32,13 @@ rsconnect::setAccountInfo(name='mbahoutche',
 # -------------------------------------------------------------------
 # 1. CHARGEMENT & NETTOYAGE DES DONNEES
 # -------------------------------------------------------------------
-df_nancy <- read.csv2("https://github.com/mb242/iut_sd2_rshiny_enedis/blob/main/data/logements_nancy.csv",
+df_nancy <- read.csv2("https://raw.githubusercontent.com/mb242/iut_sd2_rshiny_enedis/refs/heads/main/data/logements_nancy.csv",
    header = TRUE, fileEncoding = "UTF-8"
  )   #Lien vers le fichier de données stocké sur GitHub
 
 
 df_montpellier <- read.csv2(
-  "https://github.com/mb242/iut_sd2_rshiny_enedis/blob/main/data/logements_montpellier.csv",
+  "https://raw.githubusercontent.com/mb242/iut_sd2_rshiny_enedis/refs/heads/main/data/logements_montpellier.csv",
   header = TRUE, fileEncoding = "UTF-8"
 )
 
@@ -709,4 +709,5 @@ write.csv(df, "logements_nancy_montpellier.csv.gz")
 # -------------------------------------------------------------------
 
 shinyApp(ui = ui, server = server)
+
 
