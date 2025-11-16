@@ -208,15 +208,16 @@ logements_nancy_mtp <- bind_rows(logements_nancy, logements_mtp)
 # renommage dataframe
 df <- logements_nancy_mtp
 
-write.csv2(
-  logements_nancy_mtp,
-  file = "C:/Users/2018e/Downloads/logements_nancy_montpellier.csv",
-  row.names = FALSE,
-  fileEncoding = "UTF-8"
-)
+#write.csv2(
+# logements_nancy_mtp,
+#  file = "C:/Users/2018e/Downloads/logements_nancy_montpellier.csv",
+#  row.names = FALSE,
+# fileEncoding = "UTF-8"
+#)
 
 # petit contrôle
 print(table(logements_nancy_mtp$ville, logements_nancy_mtp$flag))
+
 
 
 
