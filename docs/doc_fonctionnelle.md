@@ -19,16 +19,18 @@ Elle est principalement utilisée dans un cadre d’analyse énergétique territ
 
 ---
 
-## Connexion à l’Application
+## Accès à l'application
 
 L’accès nécessite une authentication pour sécuriser les données.
+
+**Lien d'accès :** [Lien Shinyapps](https://mbahoutche.shinyapps.io/Rshinyapp/)
 
 **Identifiants disponibles :**
 
 * **Nom d'utilisateur :** Anthony
 * **Mot de passe :** SARDELLITTI
 
-Une fois connecté, l’utilisateur accède à un tableau de bord avec plusieurs pages thématiques.
+Une fois connecté, l’utilisateur accède à un tableau de bord avec plusieurs onglets.
 
 ---
 
@@ -178,10 +180,10 @@ Cette application permet de :
 
 ## Liens Utiles
 
-* 📘 Dépôt GitHub
-* 📄 Documentation technique
-* 🔧 Code source
-* 📊 Rapports complémentaires
+* [📘 Dépôt GitHub](https://github.com/mb242/iut_sd2_rshiny_enedis/tree/main)
+* [📄 Documentation technique](https://github.com/mb242/iut_sd2_rshiny_enedis/tree/main/rapport)
+* [🔧 Code source](https://github.com/mb242/iut_sd2_rshiny_enedis/tree/main/docs)
+* [📊 Rapports complémentaires](https://github.com/mb242/iut_sd2_rshiny_enedis/tree/main/docs)
 
 ---
 
@@ -190,11 +192,3 @@ Cette application permet de :
 Pour toute question :
 📩 **[admin@support.com](mailto:admin@support.com)**
 
----
-
-Si vous souhaitez, je peux aussi vous fournir :
-
-✅ Une version PDF
-✅ Un README.md format GitHub premium
-✅ Une version courte pour la page d’accueil
-➡️ Dites-moi ce que vous préférez.
