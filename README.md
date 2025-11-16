@@ -142,9 +142,10 @@ Interface type HUD futuriste avec fond personnalisé et charte graphique CSS
 
 ### Participants :  
 
-  - PHAM Thi Cam Tien
-  - Aristide Tchetche
-  - Elk-Fred MBAHOUKA
+  - **[PHAM Thi Cam Tien](mailto:thi-cam-tien.pham2@univ-lyon2.fr)**
+  - **[Aristide Tchetche](mailto:aristide.tchetche@univ-lyon2.fr)**
+  - **[Elk-Fred MBAHOUKA](mailto:elk-fred.mbahouka@univ-lyon2.fr)**
+    
 ### Client
 
 - **ENEDIS** - Demandeur du projet
