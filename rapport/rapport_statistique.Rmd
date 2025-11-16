@@ -101,7 +101,7 @@ pacman::p_load(
 
 ```{r include=FALSE}
 # importer  les données 
-  "https://raw.githubusercontent.com/mb242/iut_sd2_rshiny_enedis/main/data/logements_nancy.csv",
+  df_nancy <- read.csv2("https://raw.githubusercontent.com/mb242/iut_sd2_rshiny_enedis/main/data/logements_nancy.csv",
   header = TRUE,
   fileEncoding = "UTF-8"
 )
@@ -900,6 +900,7 @@ ___
 L’analyse exhaustive des données immobilières et énergétiques révèle des disparités significatives entre les villes étudiées. À Nancy, le parc immobilier ancien présente une variabilité élevée et des besoins urgents de rénovation énergétique, tandis qu’à Montpellier, les logements sont en moyenne plus récents et mieux performants. L’intégration des indicateurs de surface habitable, de coût énergétique et de classe DPE permet non seulement de hiérarchiser les priorités en matière de rénovation, mais aussi de fournir une vision claire et actionable pour la planification urbaine et la transition énergétique.\n  
 
 Ce projet montre comment l’analyse méthodique des données permet de transformer l’information en décisions concrètes, tout en soulignant l’importance du contexte local (climat, âge du bâti) pour optimiser les politiques de logement et d’efficacité énergétique.
+
 
 
 
