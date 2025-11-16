@@ -144,7 +144,7 @@ Interface type HUD futuriste avec fond personnalisé et charte graphique CSS
 
   - **[PHAM Thi Cam Tien](mailto:thi-cam-tien.pham2@univ-lyon2.fr)**
   - **[Aristide Tchetche](mailto:aristide.tchetche@univ-lyon2.fr)**
-  - **[Elk-Fred MBAHOUKA]  - **[Elk-Fred MBAHOUKA](<a href="mailto:elk-fred.mbahouka@univ-lyon2.fr?subject=Contact&body=Bonjour%2C%20je%20vous%20écris%20concernant...">)**
+  - **[Elk-Fred MBAHOUKA](mailto:elk-fred.mbahouka@univ-lyon2.fr)**
     
 ### Client
 
