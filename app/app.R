@@ -99,8 +99,24 @@ if ("X_geopoint" %in% names(df)) {
 # 2. UI
 # -------------------------------------------------------------------
 
-addResourcePath("www", "www")
+github_base <- "https://raw.githubusercontent.com/mb242/iut_sd2_rshiny_enedis/main/app/www"
 
+image_urls <- list(
+  logo_iut = paste0(github_base, "/logo_iut.jpg"),
+  logo_enedis = paste0(github_base, "/logo_enedis.jpg"),
+  ia_bg = paste0(github_base, "/ia.jpg")
+)
+
+# ====== Utilitaires d'export ======
+save_plotly_png <- function(p, file, vwidth = 1200, vheight = 800, scale = 2){
+  htmlfile <- tempfile(fileext = ".html")
+  htmlwidgets::saveWidget(plotly::as_widget(p), file = htmlfile, selfcontained = TRUE)
+  webshot2::webshot(htmlfile, file = file, vwidth = vwidth, vheight = vheight, zoom = scale)
+}
+
+save_ggplot_png <- function(p, file, width = 12, height = 8, dpi = 150){
+  ggplot2::ggsave(filename = file, plot = p, width = width, height = height, dpi = dpi)
+}
 
 
 
@@ -166,7 +182,7 @@ html, body {
   height: 100%;
   background:
     linear-gradient(rgba(2,6,23,.55), rgba(2,6,23,.55)),
-    url('test/ia.jpg') center / cover no-repeat fixed !important;
+    url('https://raw.githubusercontent.com/mb242/iut_sd2_rshiny_enedis/main/app/www/ia.jpg') center / cover no-repeat fixed !important;
 }
 .welcome-title {
   text-align:center; font-size:32px; font-weight:900; text-transform:uppercase; letter-spacing:1.5px;
@@ -388,36 +404,37 @@ server <- function(input, output, session) {
     if (isTRUE(user_logged())) return(NULL)
     div(
       class = "login-overlay",
-      # CORRECTION : Utilisez les chemins locaux au lieu des URLs GitHub
-      tags$img(src = "www/logo_iut.jpg", class = "brand-left", alt = "IUT"),
-      tags$img(src = "www/logo_enedis.jpg", class = "brand-right", alt = "Enedis"),
-        div(class = "auth-card",
-            div(class = "auth-hero",
-                span(class = "tag", tagList(icon("bolt"), " OBSERVATOIRE DPE")),
-                h1(class = "auth-title",
-                   HTML("Accès sécurisé — <span style='color:#93c5fd'>Nancy</span> &amp; <span style='color:#c7d2fe'>Montpellier</span>")
-                ),
-                p(class = "auth-sub","Analyse des diagnostics, cartographie, indicateurs clés et exports.")
-            ),
-            div(class = "auth-form",
-                h2("Bienvenue asardell"),
-                div(class = "note","Veuillez saisir votre identifiant et votre mot de passe."),
-                div(class = "login-field",
-                    span(class = "login-label", tagList(icon("user"), " Identifiant")),
-                    textInput("login_user", label = NULL, placeholder = "ex. votre prenom")
-                ),
-                div(class = "login-field",
-                    span(class = "login-label", tagList(icon("lock"), " Mot de passe")),
-                    passwordInput("login_password", label = NULL, placeholder = "••••••••••••••••")
-                ),
-                div(class = "btn-submit", actionButton("login_btn", "Se connecter")),
-                uiOutput("login_feedback"),
-                div(class = "auth-foot","Partenariat IUT × Enedis — Accès réservé")
-            )
-        )
+      # URLs directes GitHub pour les logos
+      tags$img(src = "https://raw.githubusercontent.com/mb242/iut_sd2_rshiny_enedis/main/app/www/logo_iut.jpg", 
+               class = "brand-left", alt = "IUT"),
+      tags$img(src = "https://raw.githubusercontent.com/mb242/iut_sd2_rshiny_enedis/main/app/www/logo_enedis.jpg", 
+               class = "brand-right", alt = "Enedis"),
+      div(class = "auth-card",
+          div(class = "auth-hero",
+              span(class = "tag", tagList(icon("bolt"), " OBSERVATOIRE DPE")),
+              h1(class = "auth-title",
+                 HTML("Accès sécurisé — <span style='color:#93c5fd'>Nancy</span> &amp; <span style='color:#c7d2fe'>Montpellier</span>")
+              ),
+              p(class = "auth-sub","Analyse des diagnostics, cartographie, indicateurs clés et exports.")
+          ),
+          div(class = "auth-form",
+              h2("Bienvenue asardell"),
+              div(class = "note","Veuillez saisir votre identifiant et votre mot de passe."),
+              div(class = "login-field",
+                  span(class = "login-label", tagList(icon("user"), " Identifiant")),
+                  textInput("login_user", label = NULL, placeholder = "ex. votre prenom")
+              ),
+              div(class = "login-field",
+                  span(class = "login-label", tagList(icon("lock"), " Mot de passe")),
+                  passwordInput("login_password", label = NULL, placeholder = "••••••••••••••••")
+              ),
+              div(class = "btn-submit", actionButton("login_btn", "Se connecter")),
+              uiOutput("login_feedback"),
+              div(class = "auth-foot","Partenariat IUT × Enedis — Accès réservé")
+          )
+      )
     )
   })
-  
   observeEvent(input$login_btn, {
     req(input$login_user, input$login_password)
     valid_user <- "Anthony"; valid_pwd <- "SARDELLITTI"
@@ -709,6 +726,7 @@ write.csv(df, "logements_nancy_montpellier.csv.gz")
 # -------------------------------------------------------------------
 
 shinyApp(ui = ui, server = server)
+
 
 
 
