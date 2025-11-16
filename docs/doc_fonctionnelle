@@ -1,136 +1,200 @@
----
-title: "Documentation Fonctionnelle – Observations DPE"
-author: "MBAHOUKA Elk-Fred, TCHETCHE Aristide et PHAM Thi Cam Tien"
-date: "`r format(Sys.time(), '%d/%m/%Y')`"
-output:
-  md_document:
-    variant: gfm
----
+# Documentation Fonctionnelle
 
-# Documentation Fonctionnelle – Observations DPE
-
-## Accès à l'application
-
-**Lien d'accès :** Lien Shinyapps  
-**Identifiants nécessaires :**  
-- Nom d'utilisateur : Anthony  
-- Mot de passe : SARDELLITTI  
+## Application d’Analyse des Observations DPE – Nancy & Montpellier
 
 ---
 
-# Introduction & Contexte
+## Présentation de l’Application
 
-Bienvenue dans l’application **Observations DPE – Analyse et Visualisation**.
+Cette application web interactive permet d’analyser et visualiser les **Diagnostics de Performance Énergétique (DPE)** des logements des villes de **Nancy** et **Montpellier**.
+Elle offre une exploration intuitive et dynamique des données, afin de mieux comprendre :
 
-Cette application permet d'explorer les diagnostics DPE des logements des villes de **Nancy** et **Montpellier** de manière intuitive et interactive.
+* La performance énergétique des logements
+* Les comportements de consommation
+* Les émissions de CO₂
+* Les zones géographiques prioritaires
+* Les corrélations entre caractéristiques et diagnostic DPE
 
-## Objectifs principaux
-
-- Fournir un aperçu global des données via indicateurs clés et graphiques synthétiques.  
-- Permettre la comparaison entre variables et étiquettes DPE.  
-- Explorer les relations entre consommation, émissions et caractéristiques des logements.  
-- Offrir une visualisation spatiale (carte interactive).  
-- Exporter graphiques et données pour analyses externes.
-
-## À propos des données
-
-- **Volumes :** ~5000 logements à Nancy, ~4000 à Montpellier.  
-- **Types :** maisons individuelles, appartements, bâtiments collectifs.  
-- **Variables :** surface, consommation énergétique (kWh/m²/an), émissions CO2 (kg/m²/an), étiquette DPE (A à G), géolocalisation.
-
-💡 **Commencez par la page d'accueil pour visualiser les KPI principaux.**
+Elle est principalement utilisée dans un cadre d’analyse énergétique territoriale et d’aide à la décision.
 
 ---
 
-# Page d'accueil – Indicateurs clés (KPI)
+## Connexion à l’Application
 
-La page d'accueil affiche trois KPI :
+L’accès nécessite une authentication pour sécuriser les données.
 
-### 🏘️ Total logements analysés  
-Nombre total de logements pris en compte.
+**Identifiants disponibles :**
 
-### 🔥 Logements "passoires énergétiques" (E, F, G)  
-Logements très énergivores.
+* **Nom d'utilisateur :** Anthony
+* **Mot de passe :** SARDELLITTI
 
-### ⚡ Consommation énergétique moyenne  
-Moyenne de consommation (kWh/m²/an).
-
-### Fonctionnalités supplémentaires  
-- Panneau de filtres (ville, année, étiquette DPE, etc.)  
-- Toutes les visualisations s’adaptent aux filtres  
-
-💡 **Filtrer par ville ou période accélère le rendu.**
+Une fois connecté, l’utilisateur accède à un tableau de bord avec plusieurs pages thématiques.
 
 ---
 
-# Structure des onglets
-
-L’application comprend **5 onglets principaux**.
-
-## 📊 Onglet 1 — Vue d’ensemble  
-- Graphiques récapitulatifs (interactifs et statistiques).  
-- Export PNG disponible.  
-💡 Survolez les barres pour obtenir les détails.
-
-## ⚖️ Onglet 2 — Comparaison  
-- **Boxplots** selon étiquettes DPE  
-- **Nuages de points** + corrélations  
-- **Régression linéaire** : choix des variables X/Y, équation, R²  
-
-💡 Utilisez les filtres sur grands datasets.
-
-## 🔗 Onglet 3 — Évolution cumulée  
-- Évolution cumulée du coût et de la consommation selon l'année DPE.  
-- Analyse du chauffage, de l'éclairage et de la consommation 5 usages.
-
-## 🗺️ Onglet 4 — Carte interactive  
-- Répartition des logements par ville  
-- Visualisation des étiquettes DPE  
-- Identification des zones performantes / à risque
-
-## 📑 Onglet 5 — Données  
-- Tableau dynamique filtrable  
-- Adresses, caractéristiques, diagnostics, consommations, émissions  
-- Accès aux données brutes
+## Pages et Fonctionnalités
 
 ---
 
-# Fonctionnement des filtres
+# 🏠 Page d’Accueil — Indicateurs Clés (KPI)
 
-Les filtres influencent **tous les onglets simultanément**.
+Cette page présente une synthèse globale des diagnostics à travers trois KPI :
 
-Filtres disponibles :  
-- Ville  
-- Période de construction  
-- Étiquette DPE  
-- Type d’énergie de chauffage (Bois-bûches, granulés, électricité…)
+* **🏘️ Total de logements analysés** : volume total des DPE intégrés
+* **🔥 Logements “passoires énergétiques” (E, F, G)**
+* **⚡ Consommation énergétique moyenne (kWh/m²/an)**
 
-💡 **Combiner plusieurs filtres = analyses plus précises + rapidité.**
+### Fonctionnalités supplémentaires
 
----
+* Panneau de filtres global (ville, période, étiquette DPE…).
+* Toutes les visualisations des autres onglets s’adaptent dynamiquement.
 
-# Résumé des apports
-
-L'application permet de :
-
-- Explorer les diagnostics DPE de manière interactive  
-- Identifier les logements énergivores  
-- Comparer les consommations et corrélations  
-- Visualiser spatialement la performance énergétique  
-- Exporter graphiques et données
+**Conseil :** Filtrez d’abord par ville pour réduire le volume et accélérer le rendu.
 
 ---
 
-# 🔗 Liens utiles
+# 📊 Onglet 1 — Vue d’Ensemble
 
-- Dépôt GitHub (code & README)  
-- Fichier RMarkdown  
-- Documentation technique  
-- Documentation fonctionnelle  
+Cette page fournit une vue globale des diagnostics, avec deux modes :
+
+### Mode Interactif
+
+* Graphiques dynamiques
+* Affichage de popups au survol
+* Export PNG disponible
+
+### Mode Statistique
+
+* Résumés chiffrés et représentations synthétiques
+
+**Astuce :** Survolez chaque barre pour afficher les valeurs exactes.
 
 ---
 
-# 💬 Support
+# ⚖️ Onglet 2 — Comparaison
 
-Pour toute question ou problème :  
-📩 **admin@support.com**
+Cet onglet permet de comparer visuellement les consommations, émissions et performances des logements.
+
+Il propose :
+
+### 1. **Boxplots des consommations selon l’étiquette DPE**
+
+* Comprendre la distribution
+* Visualiser les dispersions
+* Comparer les groupes entre eux
+
+### 2. **Nuage de points personnalisable (X vs Y)**
+
+* Sélection libre de deux variables
+* Analyse des corrélations
+* Visualisation des tendances
+
+### 3. **Régression linéaire**
+
+* Affichage de la droite ajustée
+* Affichage de l’équation
+* Coefficient **R²**
+
+**Conseil :** Appliquez des filtres pour améliorer le temps de calcul sur les gros jeux de données.
+
+---
+
+# 🔗 Onglet 3 — Évolution Cumulée
+
+Analyse temporelle des consommations et coûts énergétiques :
+
+* Évolution annuelle cumulée
+* Comparaison des 5 usages (chauffage, éclairage…)
+* Mise en évidence des tendances
+
+---
+
+# 🗺️ Onglet 4 — Carte Interactive
+
+Cet onglet visualise de manière géographique l’ensemble des logements via une carte interactive.
+
+### Fonctionnalités
+
+* Affichage des logements de **Nancy** et **Montpellier**
+* Couleurs selon étiquette DPE
+* Zoom et navigation libre
+* Popups détaillant :
+
+  * Adresse
+  * Étiquette DPE
+  * Consommation énergétique
+
+### Utilité
+
+* Identifier les zones performantes
+* Détecter les zones à risque énergétique
+* Visualiser les clusters de passoires énergétiques
+
+---
+
+# 📑 Onglet 5 — Données
+
+Cette section permet d’explorer et d’exporter les données brutes.
+
+### Fonctionnalités
+
+* Tableau interactif (filtrage, tri, recherche par colonne)
+* Pagination (10 / 25 / 50 / 100 lignes)
+* Export CSV
+* Colonnes : adresses, caractéristiques, diagnostics, consommations, émissions…
+
+---
+
+# 🎛️ Filtres — Personnalisation de l’Analyse
+
+Les filtres influencent **toutes les pages simultanément**.
+
+### Filtres disponibles
+
+* Ville
+* Période / année DPE
+* Étiquette DPE
+* Type de logement
+* Type d’énergie de chauffage
+* Surface
+* Consommation et émissions
+
+**Conseil :** Combinez plusieurs filtres pour effectuer des analyses ciblées.
+
+---
+
+## Résumé des Apports
+
+Cette application permet de :
+
+* Explorer les diagnostics DPE de manière interactive
+* Identifier les logements énergivores
+* Comparer les consommations et corrélations
+* Visualiser la répartition géographique
+* Exporter graphiques et données
+* Gagner en efficacité pour l’analyse énergétique territoriale
+
+---
+
+## Liens Utiles
+
+* 📘 Dépôt GitHub
+* 📄 Documentation technique
+* 🔧 Code source
+* 📊 Rapports complémentaires
+
+---
+
+## Support
+
+Pour toute question :
+📩 **[admin@support.com](mailto:admin@support.com)**
+
+---
+
+Si vous souhaitez, je peux aussi vous fournir :
+
+✅ Une version PDF
+✅ Un README.md format GitHub premium
+✅ Une version courte pour la page d’accueil
+➡️ Dites-moi ce que vous préférez.
