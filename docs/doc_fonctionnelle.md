@@ -181,15 +181,16 @@ Cette application permet de :
 ## Liens Utiles
 
 * [📘 Dépôt GitHub](https://github.com/mb242/iut_sd2_rshiny_enedis/tree/main)
-* [📄 Documentation technique](https://github.com/mb242/iut_sd2_rshiny_enedis/tree/main/rapport)
-* [🔧 Code source](https://github.com/mb242/iut_sd2_rshiny_enedis/tree/main/docs)
-* [🖥️ Rapports scripts](https://github.com/mb242/iut_sd2_rshiny_enedis/tree/main/docs)
-* [📊 Rapports complémentaires](file:///C:/Users/ThiCamTienPHAM/OneDrive%20-%20AGENCE%20FRANCE%20LOCALE/01%20IUT/R_projet/script_rapport_statistique.html)
+* [📄 Documentation fonctionnelle ](https://github.com/mb242/iut_sd2_rshiny_enedis/blob/main/docs/doc_fonctionnelle.md)
+* [📄 Documentation technique ](https://github.com/mb242/iut_sd2_rshiny_enedis/blob/main/docs/doc_technique.md)
+* [🔧 Code source shiny App](https://github.com/mb242/iut_sd2_rshiny_enedis/blob/main/app/app.R)
+* [🖥️ Rapport ](https://github.com/mb242/iut_sd2_rshiny_enedis/blob/main/rapport/rapport_statistique.html)
+* [📊 Rapports complémentaires](https://github.com/mb242/iut_sd2_rshiny_enedis/blob/main/rapport/rapport_statistique.Rmd)
 
 ---
 
 ## Support
 
 Pour toute question :
-📩 **[admin@support.com](mailto:admin@support.com)**
+📩 **[admin@support.com](mailto:2018elkfred@gmail.com)**
 
