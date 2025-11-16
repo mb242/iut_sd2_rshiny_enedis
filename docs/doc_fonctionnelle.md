@@ -1,6 +1,6 @@
 # Documentation Fonctionnelle
 
-## Application d’Analyse des Observations DPE – Nancy & Montpellier
+## OBSERVATOIRE DPE – Nancy & Montpellier
 
 ---
 
