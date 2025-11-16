@@ -10,7 +10,6 @@ library(shinythemes)
 library(plotly)        # interactivité
 library(htmlwidgets)   # sauvegarde des widgets html
 library(webshot2)      # capture PNG de widgets html
-# library(mapview)     # plus besoin, on exporte la carte avec webshot2
 
 # ====== Utilitaires d'export ======
 save_plotly_png <- function(p, file, vwidth = 1200, vheight = 800, scale = 2){
@@ -22,10 +21,6 @@ save_ggplot_png <- function(p, file, width = 12, height = 8, dpi = 150){
   ggplot2::ggsave(filename = file, plot = p, width = width, height = height, dpi = dpi)
 }
 
-
-
-
-
 # -------------------------------------------------------------------
 # 1. CHARGEMENT & NETTOYAGE DES DONNEES
 # -------------------------------------------------------------------
@@ -34,8 +29,6 @@ df_nancy <- read.csv2(
   header = TRUE,
   fileEncoding = "UTF-8"
 )
-#Lien vers le fichier de données stocké sur GitHub
-
 
 df_montpellier <- read.csv2(
   "https://raw.githubusercontent.com/mb242/iut_sd2_rshiny_enedis/main/data/logements_montpellier.csv",
@@ -98,28 +91,6 @@ if ("X_geopoint" %in% names(df)) {
 # -------------------------------------------------------------------
 # 2. UI
 # -------------------------------------------------------------------
-
-github_base <- "https://raw.githubusercontent.com/mb242/iut_sd2_rshiny_enedis/main/app/www"
-
-image_urls <- list(
-  logo_iut = paste0(github_base, "/logo_iut.jpg"),
-  logo_enedis = paste0(github_base, "/logo_enedis.jpg"),
-  ia_bg = paste0(github_base, "/ia.jpg")
-)
-
-# ====== Utilitaires d'export ======
-save_plotly_png <- function(p, file, vwidth = 1200, vheight = 800, scale = 2){
-  htmlfile <- tempfile(fileext = ".html")
-  htmlwidgets::saveWidget(plotly::as_widget(p), file = htmlfile, selfcontained = TRUE)
-  webshot2::webshot(htmlfile, file = file, vwidth = vwidth, vheight = vheight, zoom = scale)
-}
-
-save_ggplot_png <- function(p, file, width = 12, height = 8, dpi = 150){
-  ggplot2::ggsave(filename = file, plot = p, width = width, height = height, dpi = dpi)
-}
-
-
-
 ui <- fluidPage(
   theme = shinytheme("flatly"),
   
@@ -193,7 +164,7 @@ html, body {
   min-height:100vh; padding:30px 20px 40px; color:#e5e7eb;
   background:
     linear-gradient(rgba(2,6,23,.55), rgba(2,6,23,.55)),
-    url('test/ia.jpg') center / cover no-repeat fixed !important;
+    url('https://raw.githubusercontent.com/mb242/iut_sd2_rshiny_enedis/main/app/www/ia.jpg') center / cover no-repeat fixed !important;
   position:relative;
 }
 .hud-bg::before{ content:''; position:fixed; inset:0;
@@ -213,6 +184,14 @@ html, body {
 .kpi-icon{ font-size:36px; margin-right:15px; }
 .kpi-text p{ margin:0; font-size:11px; text-transform:uppercase; letter-spacing:1.5px; }
 .kpi-text h3{ margin:3px 0 0; font-weight:700; }
+
+/* Graphiques sur fond blanc */
+.plot-container {
+  background: white !important;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
 
 /* DataTable clair */
 table.dataTable { background-color:#ffffff !important; color:#111827 !important; }
@@ -245,6 +224,24 @@ table.dataTable thead input{
 .dataTables_scrollBody{ background:#ffffff !important; }
 table.dataTable.stripe tbody tr.odd { background-color:#f9fafb !important; }
 table.dataTable.stripe tbody tr.even{ background-color:#ffffff !important; }
+
+/* Onglets en blanc gras */
+.nav-tabs > li > a {
+  color: white !important;
+  font-weight: bold !important;
+  background-color: rgba(255,255,255,0.1) !important;
+  border: 1px solid rgba(255,255,255,0.3) !important;
+}
+.nav-tabs > li.active > a {
+  color: #1e3a8a !important;
+  font-weight: bold !important;
+  background-color: white !important;
+  border: 1px solid white !important;
+}
+.nav-tabs > li > a:hover {
+  color: white !important;
+  background-color: rgba(255,255,255,0.2) !important;
+}
 "))),
   
   # ===== Corps =====
@@ -305,86 +302,111 @@ table.dataTable.stripe tbody tr.even{ background-color:#ffffff !important; }
             # ---- Vue d'ensemble ----
             tabPanel(
               "Vue d'ensemble",
-              radioButtons("mode_graph", "Mode des graphiques",
-                           choices = c("Interactif" = "plotly", "Statique" = "ggplot"),
-                           selected = "plotly", inline = TRUE),
-              fluidRow(
-                column(6,
-                       uiOutput("ui_plot_dpe"),
-                       br(),
-                       downloadButton("dl_dpe_png", "Exporter DPE (PNG)")
-                ),
-                column(6,
-                       uiOutput("ui_plot_ges"),
-                       br(),
-                       downloadButton("dl_ges_png", "Exporter GES (PNG)")
-                )
+              div(class = "plot-container",
+                  radioButtons("mode_graph", "Mode des graphiques",
+                               choices = c("Interactif" = "plotly", "Statique" = "ggplot"),
+                               selected = "plotly", inline = TRUE),
+                  fluidRow(
+                    column(6,
+                           uiOutput("ui_plot_dpe"),
+                           br(),
+                           downloadButton("dl_dpe_png", "Exporter DPE (PNG)")
+                    ),
+                    column(6,
+                           uiOutput("ui_plot_ges"),
+                           br(),
+                           downloadButton("dl_ges_png", "Exporter GES (PNG)")
+                    )
+                  )
               )
             ),
             
             # ---- Comparaisons ----
             tabPanel(
               "Comparaisons détaillées",
-              br(),
-              tabsetPanel(
-                tabPanel(
-                  "Conso EP/m² vs période",
-                  plotOutput("plot_conso_periode", height = 350),
+              div(class = "plot-container",
                   br(),
-                  downloadButton("dl_conso_periode_png", "Exporter (PNG)")
-                ),
-                tabPanel(
-                  "Coût chauffage vs DPE",
-                  plotOutput("plot_cout_dpe", height = 350),
-                  br(),
-                  downloadButton("dl_cout_dpe_png", "Exporter (PNG)")
-                ),
-                tabPanel(
-                  "Surface vs coût chauffage",
-                  plotOutput("plot_surface_cout", height = 350),
-                  br(),
-                  downloadButton("dl_surface_cout_png", "Exporter (PNG)")
-                ),
-                tabPanel(
-                  "Régression linéaire",
-                  fluidRow(
-                    column(4,
-                           h4("Choix des variables"),
-                           selectInput("reg_x", "Variable explicative (X)", choices = num_vars, selected = default_x),
-                           selectInput("reg_y", "Variable à expliquer (Y)", choices = num_vars, selected = default_y),
-                           br(), h4("Équation de la droite"),
-                           verbatimTextOutput("reg_equation"),
-                           br(),
-                           downloadButton("dl_regression_png", "Exporter régression (PNG)")
+                  tabsetPanel(
+                    tabPanel(
+                      "Conso EP/m² vs période",
+                      plotlyOutput("plot_conso_periode", height = 350),
+                      br(),
+                      downloadButton("dl_conso_periode_png", "Exporter (PNG)")
                     ),
-                    column(8,
-                           plotOutput("plot_regression", height = 350)
+                    tabPanel(
+                      "Coût chauffage vs DPE",
+                      plotlyOutput("plot_cout_dpe", height = 350),
+                      br(),
+                      downloadButton("dl_cout_dpe_png", "Exporter (PNG)")
+                    ),
+                    tabPanel(
+                      "Surface vs coût chauffage",
+                      plotOutput("plot_surface_cout", height = 350),
+                      br(),
+                      downloadButton("dl_surface_cout_png", "Exporter (PNG)")
+                    ),
+                    tabPanel(
+                      "Régression linéaire",
+                      fluidRow(
+                        column(4,
+                               h4("Choix des variables"),
+                               selectInput("reg_x", "Variable explicative (X)", choices = num_vars, selected = default_x),
+                               selectInput("reg_y", "Variable à expliquer (Y)", choices = num_vars, selected = default_y),
+                               br(), h4("Équation de la droite"),
+                               verbatimTextOutput("reg_equation"),
+                               br(),
+                               downloadButton("dl_regression_png", "Exporter régression (PNG)")
+                        ),
+                        column(8,
+                               plotOutput("plot_regression", height = 350)
+                        )
+                      )
                     )
                   )
-                )
               )
             ),
             
-            # ---- Corrélogramme ----
+            # ---- Courbes cumulées ----
             tabPanel(
-              "Corrélogramme",
-              br(),
-              plotlyOutput("cor_plotly", height = 600),
-              br(),
-              downloadButton("dl_cor_png","Exporter corrélogramme (PNG)")
+              "Évolution cumulée",
+              div(class = "plot-container",
+                  br(),
+                  plotlyOutput("courbes_plotly", height = "600px"),
+                  br(),
+                  fluidRow(
+                    column(12,
+                           div(style = "background: #f8f9fa; padding: 15px; border-radius: 8px;",
+                               h4("Informations sur le graphique :"),
+                               p("• Courbes montrant l'évolution CUMULÉE des coûts et consommations"),
+                               p("• Les valeurs s'ajoutent année après année"),
+                               p("• Axe de gauche : Coûts en euros (€)"),
+                               p("• Axe de droite : Consommation en kilowattheures (kWh)")
+                           )
+                    )
+                  ),
+                  br(),
+                  downloadButton("dl_courbes_png", "Exporter les courbes (PNG)")
+              )
             ),
             
             # ---- Carte ----
             tabPanel(
               "Carte interactive",
-              br(),
-              leafletOutput("map_dpe", height = "650px"),
-              br(),
-              downloadButton("dl_map_png", "Exporter la carte (PNG)")
+              div(class = "plot-container",
+                  br(),
+                  leafletOutput("map_dpe", height = "650px"),
+                  br(),
+                  downloadButton("dl_map_png", "Exporter la carte (PNG)")
+              )
             ),
             
             # ---- Données ----
-            tabPanel("Données", br(), DTOutput("table_data"))
+            tabPanel("Données", 
+                     div(class = "plot-container",
+                         br(), 
+                         DTOutput("table_data")
+                     )
+            )
           )
         )
       )
@@ -399,12 +421,11 @@ server <- function(input, output, session) {
   
   # --------- Auth ----------
   user_logged <- reactiveVal(FALSE)
-
+  
   output$login_panel <- renderUI({
     if (isTRUE(user_logged())) return(NULL)
     div(
       class = "login-overlay",
-      # URLs directes GitHub pour les logos
       tags$img(src = "https://raw.githubusercontent.com/mb242/iut_sd2_rshiny_enedis/main/app/www/logo_iut.jpg", 
                class = "brand-left", alt = "IUT"),
       tags$img(src = "https://raw.githubusercontent.com/mb242/iut_sd2_rshiny_enedis/main/app/www/logo_enedis.jpg", 
@@ -435,6 +456,7 @@ server <- function(input, output, session) {
       )
     )
   })
+  
   observeEvent(input$login_btn, {
     req(input$login_user, input$login_password)
     valid_user <- "Anthony"; valid_pwd <- "SARDELLITTI"
@@ -484,9 +506,10 @@ server <- function(input, output, session) {
       scale_y_continuous(expand = expansion(mult = c(0, 0.10))) +
       labs(title = "Répartition des logements par étiquette DPE", x = "DPE", y = NULL) +
       theme_minimal() +
-      theme(axis.text.y = element_blank(), axis.ticks.y = element_blank(),
-            panel.grid.major.y = element_blank(), panel.grid.minor.y = element_blank())
+      theme(panel.background = element_rect(fill = "white", color = NA),
+            plot.background = element_rect(fill = "white", color = NA))
   })
+  
   plot_ges_gg <- reactive({
     d <- data_filtre()
     d$etiquette_ges <- factor(d$etiquette_ges, levels = names(dpe_colors))
@@ -499,8 +522,8 @@ server <- function(input, output, session) {
       scale_y_continuous(expand = expansion(mult = c(0, 0.10))) +
       labs(title = "Répartition des logements par étiquette GES", x = "GES", y = NULL) +
       theme_minimal() +
-      theme(axis.text.y = element_blank(), axis.ticks.y = element_blank(),
-            panel.grid.major.y = element_blank(), panel.grid.minor.y = element_blank())
+      theme(panel.background = element_rect(fill = "white", color = NA),
+            plot.background = element_rect(fill = "white", color = NA))
   })
   
   # ---- Bascule Plotly / ggplot ----
@@ -512,8 +535,14 @@ server <- function(input, output, session) {
     if (input$mode_graph == "plotly") plotlyOutput("plot_ges_i", height = 300)
     else                             plotOutput ("plot_ges_s", height = 300)
   })
-  output$plot_dpe_i <- renderPlotly({ ggplotly(plot_dpe_gg()) %>% config(displaylogo = FALSE) })
-  output$plot_ges_i <- renderPlotly({ ggplotly(plot_ges_gg()) %>% config(displaylogo = FALSE) })
+  output$plot_dpe_i <- renderPlotly({ 
+    p <- ggplotly(plot_dpe_gg()) %>% config(displaylogo = FALSE)
+    p %>% layout(plot_bgcolor = 'white', paper_bgcolor = 'white')
+  })
+  output$plot_ges_i <- renderPlotly({ 
+    p <- ggplotly(plot_ges_gg()) %>% config(displaylogo = FALSE)
+    p %>% layout(plot_bgcolor = 'white', paper_bgcolor = 'white')
+  })
   output$plot_dpe_s <- renderPlot ({ plot_dpe_gg() })
   output$plot_ges_s <- renderPlot ({ plot_ges_gg() })
   
@@ -533,16 +562,71 @@ server <- function(input, output, session) {
     }
   )
   
-  # --------- Graphiques Comparaisons (ggplot) ----------
-  output$plot_conso_periode <- renderPlot({
+  # --------- Graphiques Comparaisons interactifs ----------
+  output$plot_conso_periode <- renderPlotly({
     d <- data_filtre(); req("conso_5_usages_par_m2_ep" %in% names(d))
-    ggplot(d, aes(x = periode_construction, y = conso_5_usages_par_m2_ep, fill = periode_construction)) +
-      geom_boxplot(outlier.colour = "red") +
-      coord_cartesian(ylim = c(0, quantile(d$conso_5_usages_par_m2_ep, 0.95, na.rm = TRUE))) +
-      labs(title = "Conso 5 usages EP par m² selon la période de construction",
-           x = "Période de construction", y = "kWhEP/m².an") +
-      theme_minimal() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
-  }, bg = "transparent")
+    
+    # Calcul des statistiques pour chaque période
+    stats_data <- d %>%
+      group_by(periode_construction) %>%
+      summarise(
+        q1 = quantile(conso_5_usages_par_m2_ep, 0.25, na.rm = TRUE),
+        mediane = median(conso_5_usages_par_m2_ep, na.rm = TRUE),
+        moyenne = mean(conso_5_usages_par_m2_ep, na.rm = TRUE),
+        q3 = quantile(conso_5_usages_par_m2_ep, 0.75, na.rm = TRUE),
+        .groups = 'drop'
+      )
+    
+    p <- plot_ly() %>%
+      add_trace(
+        type = 'box',
+        x = ~d$periode_construction,
+        y = ~d$conso_5_usages_par_m2_ep,
+        name = "Consommation",
+        boxpoints = FALSE,
+        fillcolor = 'lightblue',
+        line = list(color = 'blue'),
+        marker = list(color = 'blue'),
+        hoverinfo = "y",
+        hovertemplate = paste(
+          "Période: %{x}<br>",
+          "Valeur: %{y:.1f} kWhEP/m².an<extra></extra>"
+        )
+      ) %>%
+      add_trace(
+        type = 'scatter',
+        x = ~stats_data$periode_construction,
+        y = ~stats_data$moyenne,
+        mode = 'markers',
+        marker = list(
+          color = 'red',
+          size = 8,
+          symbol = 'diamond'
+        ),
+        name = 'Moyenne',
+        hovertemplate = paste(
+          "Période: %{x}<br>",
+          "Moyenne: %{y:.1f} kWhEP/m².an<br>",
+          "Q1: %{customdata[0]:.1f}<br>",
+          "Médiane: %{customdata[1]:.1f}<br>",
+          "Q3: %{customdata[2]:.1f}<extra></extra>"
+        ),
+        customdata = ~matrix(c(stats_data$q1, stats_data$mediane, stats_data$q3), ncol = 3)
+      ) %>%
+      layout(
+        title = "Conso 5 usages EP par m² selon la période de construction",
+        xaxis = list(title = "Période de construction"),
+        yaxis = list(
+          title = "kWhEP/m².an",
+          range = c(0, quantile(d$conso_5_usages_par_m2_ep, 0.95, na.rm = TRUE))
+        ),
+        showlegend = TRUE,
+        plot_bgcolor = 'white',
+        paper_bgcolor = 'white'
+      )
+    
+    return(p)
+  })
   
   output$dl_conso_periode_png <- downloadHandler(
     filename = function() paste0("conso_periode_", Sys.Date(), ".png"),
@@ -554,20 +638,79 @@ server <- function(input, output, session) {
         coord_cartesian(ylim = c(0, quantile(d$conso_5_usages_par_m2_ep, 0.95, na.rm = TRUE))) +
         labs(title = "Conso 5 usages EP par m² selon la période de construction",
              x = "Période de construction", y = "kWhEP/m².an") +
-        theme_minimal() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+        theme_minimal() + 
+        theme(axis.text.x = element_text(angle = 45, hjust = 1),
+              panel.background = element_rect(fill = "white", color = NA),
+              plot.background = element_rect(fill = "white", color = NA))
       ggsave(file, plot = p, width = 8, height = 6, dpi = 300)
     }
   )
   
-  output$plot_cout_dpe <- renderPlot({
+  output$plot_cout_dpe <- renderPlotly({
     d <- data_filtre(); req("cout_chauffage" %in% names(d))
-    ggplot(d, aes(x = etiquette_dpe, y = cout_chauffage, fill = etiquette_dpe)) +
-      geom_boxplot(outlier.colour = "red") +
-      coord_cartesian(ylim = c(0, quantile(d$cout_chauffage, 0.95, na.rm = TRUE))) +
-      scale_fill_manual(values = dpe_colors, drop = FALSE, name = "Étiquette DPE") +
-      labs(title = "Coût de chauffage selon l'étiquette DPE", x = "DPE", y = "€ / an") +
-      theme_minimal()
-  }, bg = "transparent")
+    
+    # Calcul des statistiques pour chaque DPE
+    stats_data <- d %>%
+      group_by(etiquette_dpe) %>%
+      summarise(
+        q1 = quantile(cout_chauffage, 0.25, na.rm = TRUE),
+        mediane = median(cout_chauffage, na.rm = TRUE),
+        moyenne = mean(cout_chauffage, na.rm = TRUE),
+        q3 = quantile(cout_chauffage, 0.75, na.rm = TRUE),
+        .groups = 'drop'
+      )
+    
+    # Création du boxplot interactif
+    p <- plot_ly() %>%
+      add_trace(
+        type = 'box',
+        x = ~d$etiquette_dpe,
+        y = ~d$cout_chauffage,
+        name = "Coût chauffage",
+        boxpoints = FALSE,
+        fillcolor = ~dpe_colors[d$etiquette_dpe],
+        line = list(color = 'black'),
+        marker = list(color = 'black'),
+        hoverinfo = "y",
+        hovertemplate = paste(
+          "DPE: %{x}<br>",
+          "Coût: %{y:.0f} €/an<extra></extra>"
+        )
+      ) %>%
+      add_trace(
+        type = 'scatter',
+        x = ~stats_data$etiquette_dpe,
+        y = ~stats_data$moyenne,
+        mode = 'markers',
+        marker = list(
+          color = 'red',
+          size = 8,
+          symbol = 'diamond'
+        ),
+        name = 'Moyenne',
+        hovertemplate = paste(
+          "DPE: %{x}<br>",
+          "Moyenne: %{y:.0f} €/an<br>",
+          "Q1: %{customdata[0]:.0f} €<br>",
+          "Médiane: %{customdata[1]:.0f} €<br>",
+          "Q3: %{customdata[2]:.0f} €<extra></extra>"
+        ),
+        customdata = ~matrix(c(stats_data$q1, stats_data$mediane, stats_data$q3), ncol = 3)
+      ) %>%
+      layout(
+        title = "Coût de chauffage selon l'étiquette DPE",
+        xaxis = list(title = "Étiquette DPE"),
+        yaxis = list(
+          title = "Coût chauffage (€ / an)",
+          range = c(0, quantile(d$cout_chauffage, 0.95, na.rm = TRUE))
+        ),
+        showlegend = TRUE,
+        plot_bgcolor = 'white',
+        paper_bgcolor = 'white'
+      )
+    
+    return(p)
+  })
   
   output$dl_cout_dpe_png <- downloadHandler(
     filename = function() paste0("cout_dpe_", Sys.Date(), ".png"),
@@ -578,7 +721,9 @@ server <- function(input, output, session) {
         coord_cartesian(ylim = c(0, quantile(d$cout_chauffage, 0.95, na.rm = TRUE))) +
         scale_fill_manual(values = dpe_colors, drop = FALSE, name = "Étiquette DPE") +
         labs(title = "Coût de chauffage selon l'étiquette DPE", x = "DPE", y = "€ / an") +
-        theme_minimal()
+        theme_minimal() +
+        theme(panel.background = element_rect(fill = "white", color = NA),
+              plot.background = element_rect(fill = "white", color = NA))
       ggsave(file, plot = p, width = 8, height = 6, dpi = 300)
     }
   )
@@ -590,8 +735,10 @@ server <- function(input, output, session) {
       geom_point(alpha = 0.5) +
       geom_smooth(method = "lm", se = FALSE, color = "black") +
       labs(title = "Surface habitable vs coût chauffage", x = "Surface habitable (m²)", y = "Coût chauffage (€ / an)") +
-      theme_minimal()
-  }, bg = "transparent")
+      theme_minimal() +
+      theme(panel.background = element_rect(fill = "white", color = NA),
+            plot.background = element_rect(fill = "white", color = NA))
+  })
   
   output$dl_surface_cout_png <- downloadHandler(
     filename = function() paste0("surface_cout_", Sys.Date(), ".png"),
@@ -603,7 +750,9 @@ server <- function(input, output, session) {
         geom_smooth(method = "lm", se = FALSE, color = "black") +
         labs(title = "Surface habitable vs coût chauffage",
              x = "Surface habitable (m²)", y = "Coût chauffage (€ / an)") +
-        theme_minimal()
+        theme_minimal() +
+        theme(panel.background = element_rect(fill = "white", color = NA),
+              plot.background = element_rect(fill = "white", color = NA))
       ggsave(file, plot = p, width = 8, height = 6, dpi = 300)
     }
   )
@@ -614,6 +763,7 @@ server <- function(input, output, session) {
     d <- d[, c(input$reg_x, input$reg_y)]; names(d) <- c("x","y")
     d <- d[complete.cases(d), ]; req(nrow(d) > 2); d
   })
+  
   output$plot_regression <- renderPlot({
     d <- reg_data()
     ggplot(d, aes(x = x, y = y)) +
@@ -621,13 +771,16 @@ server <- function(input, output, session) {
       geom_smooth(method = "lm", se = FALSE, color = "#38bdf8") +
       labs(x = input$reg_x, y = input$reg_y,
            title = paste("Régression linéaire :", input$reg_y, "en fonction de", input$reg_x)) +
-      theme_minimal()
-  }, bg = "transparent")
+      theme_minimal() +
+      theme(panel.background = element_rect(fill = "white", color = NA),
+            plot.background = element_rect(fill = "white", color = NA))
+  })
+  
   output$reg_equation <- renderText({
     d <- reg_data(); mod <- lm(y ~ x, data = d); coefs <- coef(mod)
     paste0("y = ", round(coefs[1], 3),
            ifelse(coefs[2] >= 0, " + ", " - "),
-           abs(round(coefs[2], 3)), " * x/n",
+           abs(round(coefs[2], 3)), " * x\n",
            "R² = ", round(summary(mod)$r.squared, 4))
   })
   
@@ -642,34 +795,161 @@ server <- function(input, output, session) {
           x = input$reg_x, y = input$reg_y,
           title = paste("Régression linéaire :", input$reg_y, "en fonction de", input$reg_x)
         ) +
-        theme_minimal()
+        theme_minimal() +
+        theme(panel.background = element_rect(fill = "white", color = NA),
+              plot.background = element_rect(fill = "white", color = NA))
       ggsave(file, plot = p, width = 8, height = 6, dpi = 300)
     }
   )
   
-  # --------- Corrélogramme (Plotly) ----------
-  cor_mat <- reactive({
-    d <- data_filtre() %>% dplyr::select(where(is.numeric))
-    req(ncol(d) > 1)
-    cor(d, use = "complete.obs")
-  })
-  output$cor_plotly <- renderPlotly({
-    m <- cor_mat()
-    plot_ly(
-      z = m, type = "heatmap",
-      x = colnames(m), y = rownames(m),
-      colorscale = list(c(0,"#ef4444"), c(0.5,"#ffffff"), c(1,"#22c55e"))
-    ) %>% layout(title = "Corrélogramme (corrélations Pearson)")
-  })
-  output$dl_cor_png <- downloadHandler(
-    filename = function() paste0("correlogramme_", Sys.Date(), ".png"),
-    content  = function(file){
-      m <- cor_mat()
-      p <- plot_ly(
-        z = m, type = "heatmap",
-        x = colnames(m), y = rownames(m),
-        colorscale = list(c(0,"#ef4444"), c(0.5,"#ffffff"), c(1,"#22c55e"))
+  # --------- Courbes cumulées des coûts et consommations ----------
+  courbes_data <- reactive({
+    d <- data_filtre()
+    req("date_etablissement_dpe" %in% names(d))
+    
+    # Convertir la date en année
+    d <- d %>%
+      mutate(
+        annee = as.numeric(format(as.Date(date_etablissement_dpe), "%Y"))
+      ) %>%
+      filter(!is.na(annee))
+    
+    # Sélectionner les colonnes d'intérêt et calculer les cumuls par année
+    d %>%
+      arrange(annee) %>%
+      group_by(annee) %>%
+      summarise(
+        cout_chauffage_cumul = sum(cout_chauffage, na.rm = TRUE),
+        cout_eclairage_cumul = sum(cout_eclairage, na.rm = TRUE),
+        conso_5_usages_cumul = sum(conso_5_usages_ef, na.rm = TRUE),
+        .groups = 'drop'
+      ) %>%
+      # Calculer les cumuls croissants année par année
+      mutate(
+        cout_chauffage_cumul = cumsum(cout_chauffage_cumul),
+        cout_eclairage_cumul = cumsum(cout_eclairage_cumul),
+        conso_5_usages_cumul = cumsum(conso_5_usages_cumul)
       )
+  })
+  
+  output$courbes_plotly <- renderPlotly({
+    data <- courbes_data()
+    req(nrow(data) > 0)
+    
+    plot_ly(data, x = ~annee) %>%
+      add_trace(
+        y = ~cout_chauffage_cumul, 
+        name = "Coût chauffage cumulé", 
+        type = 'scatter', 
+        mode = 'lines+markers',
+        line = list(color = '#FF6B6B', width = 3),
+        marker = list(color = '#FF6B6B', size = 8),
+        hovertemplate = "Année: %{x}<br>Coût chauffage cumulé: %{y:,.0f} €<extra></extra>"
+      ) %>%
+      add_trace(
+        y = ~cout_eclairage_cumul, 
+        name = "Coût éclairage cumulé", 
+        type = 'scatter', 
+        mode = 'lines+markers',
+        line = list(color = '#4ECDC4', width = 3),
+        marker = list(color = '#4ECDC4', size = 8),
+        hovertemplate = "Année: %{x}<br>Coût éclairage cumulé: %{y:,.0f} €<extra></extra>"
+      ) %>%
+      add_trace(
+        y = ~conso_5_usages_cumul, 
+        name = "Consommation 5 usages cumulée", 
+        type = 'scatter', 
+        mode = 'lines+markers',
+        line = list(color = '#45B7D1', width = 3),
+        marker = list(color = '#45B7D1', size = 8),
+        hovertemplate = "Année: %{x}<br>Conso cumulée: %{y:,.0f} kWh<extra></extra>",
+        yaxis = "y2"
+      ) %>%
+      layout(
+        title = list(
+          text = "Évolution cumulée des coûts et consommations par année de DPE",
+          font = list(size = 16, color = "#2C3E50")
+        ),
+        xaxis = list(
+          title = "Année d'établissement du DPE",
+          gridcolor = '#ECF0F1',
+          titlefont = list(size = 12)
+        ),
+        yaxis = list(
+          title = "Coûts cumulés (€)",
+          gridcolor = '#ECF0F1',
+          tickformat = ",",
+          titlefont = list(size = 12)
+        ),
+        yaxis2 = list(
+          title = "Consommation cumulée (kWh)",
+          overlaying = "y",
+          side = "right",
+          gridcolor = '#ECF0F1',
+          tickformat = ",",
+          titlefont = list(size = 12)
+        ),
+        legend = list(
+          orientation = "h",
+          x = 0.5,
+          y = -0.2,
+          xanchor = "center"
+        ),
+        hovermode = "x unified",
+        plot_bgcolor = 'white',
+        paper_bgcolor = 'white',
+        margin = list(t = 50, r = 50)
+      )
+  })
+  
+  # Export PNG des courbes cumulées
+  output$dl_courbes_png <- downloadHandler(
+    filename = function() paste0("courbes_cumulees_", Sys.Date(), ".png"),
+    content = function(file) {
+      data <- courbes_data()
+      req(nrow(data) > 0)
+      
+      p <- plot_ly(data, x = ~annee) %>%
+        add_trace(
+          y = ~cout_chauffage_cumul, 
+          name = "Coût chauffage cumulé", 
+          type = 'scatter', 
+          mode = 'lines+markers',
+          line = list(color = '#FF6B6B', width = 3),
+          marker = list(color = '#FF6B6B', size = 8)
+        ) %>%
+        add_trace(
+          y = ~cout_eclairage_cumul, 
+          name = "Coût éclairage cumulé", 
+          type = 'scatter', 
+          mode = 'lines+markers',
+          line = list(color = '#4ECDC4', width = 3),
+          marker = list(color = '#4ECDC4', size = 8)
+        ) %>%
+        add_trace(
+          y = ~conso_5_usages_cumul, 
+          name = "Consommation 5 usages cumulée", 
+          type = 'scatter', 
+          mode = 'lines+markers',
+          line = list(color = '#45B7D1', width = 3),
+          marker = list(color = '#45B7D1', size = 8),
+          yaxis = "y2"
+        ) %>%
+        layout(
+          title = "Évolution cumulée des coûts et consommations par année de DPE",
+          xaxis = list(title = "Année d'établissement du DPE"),
+          yaxis = list(title = "Coûts cumulés (€)", tickformat = ","),
+          yaxis2 = list(
+            title = "Consommation cumulée (kWh)",
+            overlaying = "y",
+            side = "right",
+            tickformat = ","
+          ),
+          legend = list(orientation = "h", x = 0.5, y = -0.2, xanchor = "center"),
+          plot_bgcolor = 'white',
+          paper_bgcolor = 'white'
+        )
+      
       save_plotly_png(p, file)
     }
   )
@@ -701,6 +981,7 @@ server <- function(input, output, session) {
                 labels = names(dpe_colors)[names(dpe_colors) %in% d$etiquette_dpe],
                 title = "Étiquette DPE")
   })
+  
   # --------- Tableau de données ----------
   output$table_data <- renderDT({
     datatable(
@@ -717,17 +998,8 @@ server <- function(input, output, session) {
   })
 }
 
-
-write.csv(df, "logements_nancy_montpellier.csv.gz")
-
-
 # -------------------------------------------------------------------
 # 4. LANCEMENT
 # -------------------------------------------------------------------
 
 shinyApp(ui = ui, server = server)
-
-
-
-
-
