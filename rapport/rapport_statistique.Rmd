@@ -1,0 +1,905 @@
+---
+title: |
+  <div style="
+      text-align:center;
+      font-weight:bold;
+      font-size:35px;
+      color:#FF3333;
+      margin-top:34px;
+      margin-bottom:14px;
+      line-height:1.2em;">
+    Analyse des diagnostics de performance énergétique (DPE)
+  </div>
+
+author: |
+  <div style="
+      text-align:center;
+      font-weight:bold;
+      font-size:18px;
+      color:#003366;
+      margin-bottom:5px;">
+    MBAHOUKA Elk-Fred, TCHETCHE Aristide et PHAM Thi Cam Tien
+  </div>
+
+date: |
+  <div style="
+      text-align:left;
+      font-size:16px;
+      color:#000000;
+      margin-bottom:20px;">
+    `r format(Sys.time(), '%d/%m/%Y')`
+  </div>
+params:
+  codes_postaux: [ "54000", "34000" ]   
+  logement_type: "both"                 
+output:
+  html_document: 
+    toc: true
+    toc_float: true
+    number_sections: true
+    fig_caption: true
+    code_folding: hide
+    df_print: default
+  pdf_document:
+    toc: true
+---
+
+```{r setup, include=FALSE, message=FALSE}
+if(!require(pacman)) install.packages("pacman")
+pacman::p_load(
+  httr,       
+  jsonlite,   
+  glue,       
+  lubridate,  
+  dplyr,      
+  corrplot,   
+  ggplot2,
+  scales,
+  forcats,
+  patchwork
+)
+
+```
+
+```{asis}
+<div style="margin:10px 0;">
+  <label for="city-select"><strong><i>Sélectionner une ville pour afficher les données:</i></strong></label>
+  <select id="city-select" style="margin-left:10px;">
+    <option value="both" selected>Les deux</option>
+    <option value="Nancy">Nancy</option>
+    <option value="Montpellier">Montpellier</option>
+  </select>
+</div>
+
+<script>
+(function(){
+  function showCity(val) {
+    var ids = ['plots-both','plots-nancy','plots-mtp'];
+    ids.forEach(function(id){
+      var el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
+    if (val === 'Nancy') {
+      var e = document.getElementById('plots-nancy'); if (e) e.style.display = 'block';
+    } else if (val === 'Montpellier') {
+      var e2 = document.getElementById('plots-mtp'); if (e2) e2.style.display = 'block';
+    } else {
+      var e3 = document.getElementById('plots-both'); if (e3) e3.style.display = 'block';
+    }
+  }
+  var sel = document.getElementById('city-select');
+  sel.addEventListener('change', function(){ showCity(this.value); });
+  // init
+  showCity(sel.value);
+})();
+</script>
+
+```
+
+
+
+
+```{r include=FALSE}
+# importer  les données 
+  "https://raw.githubusercontent.com/mb242/iut_sd2_rshiny_enedis/main/data/logements_nancy.csv",
+  header = TRUE,
+  fileEncoding = "UTF-8"
+)
+
+df_montpellier <- read.csv2(
+  "https://raw.githubusercontent.com/mb242/iut_sd2_rshiny_enedis/main/data/logements_montpellier.csv",
+  header = TRUE, fileEncoding = "UTF-8"
+)
+
+df <- rbind(df_nancy, df_montpellier)
+
+
+
+```
+
+___
+
+# **Introduction**
+___
+
+- **Contexte** : Face à la hausse continue des prix de l’énergie et aux enjeux du changement climatique, il est essentiel d’évaluer l’efficacité énergétique des logements afin de mieux orienter les politiques de rénovation et de consommation responsable.  
+
+- **Problème** : Les diagnostics de performance énergétique (DPE) ne reflètent pas toujours fidèlement les consommations réelles des occupants, ce qui peut entraîner des décisions inefficaces pour la rénovation énergétique.  
+
+- **Objectif** : Cette étude vise à comparer les valeurs théoriques des DPE avec les consommations électriques réelles des logements situés à `Nancy` et `Montpellier`. Ces deux villes ont été choisies car elles représentent des climats contrastés : Nancy étant parmi les villes les plus froides de France, et Montpellier parmi les plus chaudes, ce qui permet d’analyser l’impact du climat sur la performance énergétique.  
+
+- **Méthode** : Nous utiliserons des analyses statistiques détaillées sur les données de consommation et de caractéristiques des logements, en classant ces derniers selon leur performance énergétique réelle.  
+
+- **Résultat attendu** : Les résultats permettront de mieux cibler les logements nécessitant une rénovation prioritaire et de proposer des recommandations concrètes pour améliorer l’efficacité énergétique, basées sur des données fiables.
+
+```{r include=FALSE}
+print(table(df))
+
+```
+
+```{r include=FALSE}
+# Subsets
+df_nancy <- logements_nancy_mtp %>% filter(ville == "Nancy")
+df_mtp   <- logements_nancy_mtp %>% filter(ville == "Montpellier")
+df_both  <- logements_nancy_mtp
+```
+___
+
+
+# **Analyse des KPI énergétiques et environnementaux**\n
+
+## **Tableau des KPI énergétiques et émissions de CO₂ pour les villes :**
+___
+- `n_total = nombre de logements`
+- `avg_energy = consommation énergétique moyenne (kWh/m²/an)`
+- `pct_A_C = % de logements performants énergétiquement (A-C)`
+- `avg_co2 = émissions moyennes de CO₂ (kg/m²/an)`
+
+```{r message=FALSE, warning=FALSE, paged.print=TRUE}
+compute_kpi <- function(df_city) {
+df%>%
+summarise(
+n_total = n(),
+avg_energy = mean(conso_5_usages_par_m2_ep, na.rm=TRUE),
+pct_A_C = sum(etiquette_dpe %in% c("A","B","C"), na.rm=TRUE)/n_total * 100,
+avg_co2 = mean(emission_ges_5_usages_par_m2, na.rm=TRUE)
+)
+}
+
+kpi_nancy <- compute_kpi(df_nancy) %>% mutate(ville="Nancy")
+kpi_mtp   <- compute_kpi(df_mtp)   %>% mutate(ville="Montpellier")
+kpi_both  <- bind_rows(kpi_nancy, kpi_mtp)
+
+kpi_both
+
+```
+
+## **KPI pertinents :** 
+___
+- Pour mieux comprendre la performance énergétique et l’impact environnemental des logements à Nancy et Montpellier, nous avons calculé trois KPI pertinents :
+
+- Ces indicateurs permettent de comparer de manière synthétique les villes sur le plan énergétique :
+  - Consommation énergétique moyenne (kWh/m²/an) : reflète l’intensité énergétique des logements et leur efficience.
+  - % de logements DPE A–C : montre la proportion de logements considérés comme énergétiquement performants.
+  - Émissions moyennes de CO₂ (kg/m²/an) : évalue l’impact environnemental direct lié au chauffage et à la consommation d’énergie.
+
+- Le choix de Nancy et Montpellier permet également d’observer les différences climatiques et leur influence sur ces KPI : Nancy étant l’une des villes les plus froides de France, et Montpellier l’une des plus chaudes. Cette comparaison met en évidence comment le climat peut affecter la consommation énergétique et les émissions de CO₂.
+```{r}
+# KPI 1: Consommation moyenne d'énergie ---
+p1 <- ggplot(kpi_both, aes(x=ville, y=avg_energy, fill=ville)) +
+  geom_col(width=0.4) +
+  geom_text(aes(label=round(avg_energy,1)), vjust=-0.3, size=3) +
+  labs(title="Consommation énergétique\n moyenne (kWh/m²/an)", x=NULL, y="kWh/m²/an") +
+  theme_minimal(base_size = 10) +
+  scale_fill_manual(values=c("Nancy"="#FF3333", "Montpellier"="#FFD700")) +
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        legend.position="none") 
+
+
+# KPI 2: % logements DPE A–C ---
+p2 <- ggplot(kpi_both, aes(x=ville, y=pct_A_C, fill=ville)) +
+  geom_col(width=0.4) +
+  geom_text(aes(label=paste0(round(pct_A_C,1),"%")), vjust=-0.3, size=3) +
+  labs(title="% logements DPE A–C", x=NULL, y="%") +
+  theme_minimal(base_size = 10) +
+  scale_fill_manual(values=c("Nancy"="#FF3333", "Montpellier"="#FFD700")) +
+  theme(legend.position="bottom")
+
+# KPI 3: Émissions moyennes de CO₂ ---
+p3 <- ggplot(kpi_both, aes(x=ville, y=avg_co2, fill=ville)) +
+  geom_col(width=0.4) +
+  geom_text(aes(label=round(avg_co2,1)), vjust=-0.3, size=3) +
+  labs(title="Émissions moyennes\n de CO₂ (kg/m²/an)", x=NULL, y="kg/m²/an") +
+  theme_minimal(base_size = 10) +
+  scale_fill_manual(values=c("Nancy"="#FF3333", "Montpellier"="#FFD700")) +
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),legend.position="none")
+
+
+p1 + p2 + p3
+```
+___
+
+# **Exploration des tendances énergétiques et structurelles**
+___
+
+- Dans cette section, nous interprétons les différents graphiques présentés précédemment pour mieux comprendre les caractéristiques du parc immobilier à Nancy et Montpellier. \n
+
+- L’objectif est de dégager les tendances principales, d’identifier les logements les moins performants et de proposer des actions ciblées pour améliorer l’efficacité énergétique et le confort des logements.
+
+- Nous analysons successivement :
+  - Répartition énergétique (Étiquette DPE) — pour visualiser la performance énergétique des logements.
+
+  - Surface habitable — pour examiner les tailles des logements et leur distribution.
+
+  - Coût du chauffage selon l’étiquette DPE — pour comprendre l’impact de la performance énergétique sur les dépenses.
+
+  - Corrélation surface vs coût chauffage — pour étudier la relation entre taille du logement et coût énergétique.
+
+  - Répartition logements anciens / neufs — pour contextualiser les observations selon l’âge du parc immobilier.
+
+\n
+
+## **Répartition énergétique**
+___
+Cette section présente la distribution des logements par classe DPE (A à G) pour Nancy, Montpellier, et une comparaison des deux villes, en se basant sur les estimations conventionnelles du DPE.
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+render_repart_eti_dpe <- function(df_city, suffix = "") {
+  
+  # couleurs
+  couleurs_ville <- list(
+    "Nancy" = c("#FF3333", "#B0B0B0"),
+    "Montpellier" = c("#007BFF", "#FFD700")
+  )
+  dpe_summary <- df%>%
+    group_by(ville, etiquette_dpe) %>%
+    summarise(n = n(), .groups = "drop") %>%
+    group_by(ville) %>%
+    mutate(pct = n / sum(n) * 100)
+
+  couleurs_dpe <- c(
+    "A" = "#009900","B" = "#66CC33","C" = "#FFCC33",
+    "D" = "#FF9900","E" = "#FF6600","F" = "#FF3300","G" = "#CC0000"
+  )
+
+  print(
+    ggplot(dpe_summary, aes(x = ville, y = pct, fill = etiquette_dpe)) +
+      geom_bar(stat = "identity", position = "stack") +
+      scale_fill_manual(values = couleurs_dpe) +
+      labs(title = paste0("Répartition énergétique des logements ", suffix),
+           y = "% de logements", x = "Ville") +
+      theme_minimal()
+  )}
+```
+
+
+```{r message=FALSE, results='asis'}
+
+# ---------- BOTH ----------
+
+cat('<div id="plots-both" style="display:none; margin-bottom:18px;">\n')
+render_repart_eti_dpe(df_both, suffix=" (Both)")
+
+
+# Analysis text for BOTH
+
+cat('
+
+<div style="margin-top:12px; padding:12px; border-left:5px solid #005BAC; background:#FFFFFF;">
+  <h4>Analyse — Comparaison (Nancy & Montpellier)</h4>
+  <p>La comparaison confirme que Nancy fait face à un défi de rénovation plus important. La concentration des classes D, E, F, G est nettement supérieure à Nancy, ce qui justifie la recommandation de prioriser la rénovation des logements les moins performants dans cette ville.</p>
+
+</div>
+')
+cat('</div>')
+
+# ---------- NANCY ----------
+
+cat('<div id="plots-nancy" style="display:none; margin-bottom:18px;">')
+render_repart_eti_dpe(df_nancy, suffix=" (Nancy)")
+
+# Analysis text for NANCY
+cat('
+
+<div style="margin-top:12px; padding:12px; border-left:5px solid #FF3333; background:#FFFFFF;">
+  <h4>Analyse — Nancy</h4>
+  <p><strong>Résumé:</strong> Le parc immobilier de Nancy est moins performant. Une forte proportion de logements (D à G) montre des consommations énergétiques supérieures (≈ 199 kWh/m²/an) et un besoin de rénovation important (isolation, chauffage).</p>
+</div>
+')
+cat('</div>')
+
+# ---------- MONTPELLIER ----------
+cat('<div id="plots-mtp" style="display:none; margin-bottom:18px;">')
+render_repart_eti_dpe(df_mtp, suffix=" (Montpellier)")
+
+# Analysis text for MONTPELLIER
+cat('
+<div style="margin-top:12px; padding:12px; border-left:5px solid #FFD700; background:#FFFFFF;">
+  <h4>Analyse — Montpellier</h4>
+  <p><strong>Résumé:</strong> Montpellier présente une meilleure performance énergétique, avec une proportion plus élevée de logements performants (A, B, C) (≈ 55%). Les consommations moyennes sont plus faibles (≈ 184 kWh/m²/an). Cela indique un parc plus récent, mais nécessite de cibler les copropriétés anciennes (classes D–G).</p>
+</div>
+')
+cat('</div>')
+
+# JS: show/hide the three containers
+cat('
+
+<script>
+(function(){
+  function showCity(val) {
+    var ids = ["plots-both","plots-nancy","plots-mtp"];
+    ids.forEach(function(id){
+      var el = document.getElementById(id);
+      if (el) el.style.display = "none";
+    });
+    if (val === "Nancy") {
+      var e = document.getElementById("plots-nancy"); if (e) e.style.display = "block";
+    } else if (val === "Montpellier") {
+      var e2 = document.getElementById("plots-mtp"); if (e2) e2.style.display = "block";
+    } else {
+      var e3 = document.getElementById("plots-both"); if (e3) e3.style.display = "block";
+    }
+  }
+  var sel = document.getElementById("city-select");
+  sel.addEventListener("change", function(){ showCity(this.value); });
+  // init on load
+  showCity(sel.value);
+})();
+</script>
+
+')
+
+```
+\n
+## **Surface habitable**  
+___
+Cette visualisation illustre la distribution des surfaces habitables, révélant les tendances de taille des logements et les variations entre villes.
+
+
+
+```{r}
+compute_surface_summary <- function(df_city) {
+  df_filtered <- df%>%
+    filter(!is.na(surface_habitable_logement) & surface_habitable_logement <= 500)
+  df_filtered %>%
+    group_by(ville) %>%
+    summarise(
+      n = n(),
+      min = min(surface_habitable_logement, na.rm = TRUE),
+      Q1 = quantile(surface_habitable_logement, 0.25, na.rm = TRUE),
+      median = median(surface_habitable_logement, na.rm = TRUE),
+      mean = mean(surface_habitable_logement, na.rm = TRUE),
+      Q3 = quantile(surface_habitable_logement, 0.75, na.rm = TRUE),
+      max = max(surface_habitable_logement, na.rm = TRUE),
+      sd = sd(surface_habitable_logement, na.rm = TRUE),
+      .groups = "drop"
+    )
+}
+
+if (!exists("summary_nancy") || nrow(summary_nancy) == 0) summary_nancy <- compute_surface_summary(df_nancy)
+if (!exists("summary_mtp")   || nrow(summary_mtp) == 0)   summary_mtp   <- compute_surface_summary(df_mtp)
+if (!exists("summary_both")  || nrow(summary_both) == 0)  summary_both  <- compute_surface_summary(df_both)
+
+# extraction sécurisée
+get_val <- function(tbl, ville_name, col) {
+  if (nrow(tbl) == 0) return(NA_real_)
+  row <- tbl %>% filter(ville == ville_name)
+  if (nrow(row) == 0) return(NA_real_)
+  round(row[[col]][1], 1)
+}
+
+# extract values
+mean_n <- get_val(summary_both, "Nancy", "mean")
+med_n  <- get_val(summary_both, "Nancy", "median")
+Q1_n   <- get_val(summary_both, "Nancy", "Q1")
+Q3_n   <- get_val(summary_both, "Nancy", "Q3")
+
+mean_m <- get_val(summary_both, "Montpellier", "mean")
+med_m  <- get_val(summary_both, "Montpellier", "median")
+Q1_m   <- get_val(summary_both, "Montpellier", "Q1")
+Q3_m   <- get_val(summary_both, "Montpellier", "Q3")
+
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+render_surface <- function(df_city, suffix = "") {
+  logements_filtered <- df%>%
+    filter(!is.na(surface_habitable_logement) & surface_habitable_logement <= 500)
+
+  print(
+    ggplot(logements_filtered, aes(x = ville, y = surface_habitable_logement, fill = ville)) +
+      geom_boxplot(alpha = 0.6, outlier.colour = "red", outlier.shape = 16, outlier.size = 2) +
+      scale_fill_manual(values = c("Nancy" = "#FF3333", "Montpellier" = "#FFD700")) +
+      coord_cartesian(ylim = c(0, 200)) +
+      labs(title = paste0("Surface habitable des logements ", suffix),
+           y = "Surface habitable (m²)", x = "Ville") +
+      theme_minimal(base_size = 14) +
+      theme(legend.position = "none")
+  )}
+```
+
+
+```{r message=FALSE, results='asis'}
+# ---------- BOTH ----------
+
+cat('<div id="plots-both-surface" style="display:none; margin-bottom:18px;">\n')
+render_surface(df_both, suffix=" (Both)")
+
+cat(paste0('
+<div style="margin-top:12px; padding:12px; border-left:5px solid #005BAC; background:#FFFFFF;">
+  <h4>Analyse — Comparaison (Nancy & Montpellier)</h4>
+  <p>En comparant les deux villes :</p>
+  <ul>
+    <li>Surface habitable moyenne à <strong>Nancy</strong> : ', ifelse(is.na(mean_n),"N/A",paste0(mean_n," m²")), '</li>
+    <li>Surface habitable moyenne à <strong>Montpellier</strong> : ', ifelse(is.na(mean_m),"N/A",paste0(mean_m," m²")), '</li>
+  </ul>
+  <p>Les logements à Nancy montrent une plus grande variabilité de surfaces.</p>
+  <ul>
+    <li><strong>Observation :</strong> Les logements petits (&lt; 50 m²) sont plus fréquents à Nancy.</li>
+    <li><strong>Recommandation :</strong> Prioriser les rénovations et l’amélioration de l’espace habitable dans les logements anciens à Nancy.</li>
+  </ul>
+</div>'))
+cat('</div>')
+
+# ---------- NANCY ----------
+
+cat('<div id="plots-nancy-surface" style="display:none; margin-bottom:18px;">\n')
+render_surface(df_nancy, suffix=" (Nancy)")
+
+cat(paste0('
+<div style="margin-top:12px; padding:12px; border-left:5px solid #FF3333; background:#FFFFFF;">
+  <h4>Analyse — Nancy</h4>
+  <p><strong>Résumé :</strong> Médiane : ', ifelse(is.na(med_n),"N/A",paste0(med_n," m²")), '.  
+  L’intervalle interquartile (Q1–Q3) va de ', ifelse(is.na(Q1_n),"N/A",paste0(Q1_n," m²")), ' à ', ifelse(is.na(Q3_n),"N/A",paste0(Q3_n," m²")), ',
+  ce qui indique que la majorité des logements se situent dans une tranche de taille moyenne.</p>
+  <p><strong>Actions recommandées :</strong> Améliorer les petits logements, optimiser l’espace et planifier des rénovations ciblées.</p>
+</div>'))
+cat('</div>')
+
+# ---------- MONTPELLIER ----------
+
+cat('<div id="plots-mtp-surface" style="display:none; margin-bottom:18px;">\n')
+render_surface(df_mtp, suffix=" (Montpellier)")
+
+cat(paste0('
+<div style="margin-top:12px; padding:12px; border-left:5px solid #FFD700; background:#FFFFFF;">
+  <h4>Analyse — Montpellier</h4>
+  <p><strong>Résumé :</strong> Médiane : ', ifelse(is.na(med_m),"N/A",paste0(med_m," m²")), '.  
+  La plupart des logements se situent entre ', ifelse(is.na(Q1_m),"N/A",paste0(Q1_m," m²")), ' et ', ifelse(is.na(Q3_m),"N/A",paste0(Q3_m," m²")), '.</p>
+  <p><strong>Actions recommandées :</strong> Maintenir la qualité des logements et cibler les logements plus petits pour des améliorations.</p>
+</div>'))
+cat('</div>')
+
+# JS toggle unique
+
+cat('
+<script>
+(function(){
+  function showSurface(val) {
+    var ids = ["plots-both-surface","plots-nancy-surface","plots-mtp-surface"];
+    ids.forEach(function(id){
+      var el = document.getElementById(id);
+      if(el) el.style.display="none";
+    });
+    if(val === "Nancy") {
+      document.getElementById("plots-nancy-surface").style.display="block";
+    } else if(val === "Montpellier") {
+      document.getElementById("plots-mtp-surface").style.display="block";
+    } else {
+      document.getElementById("plots-both-surface").style.display="block";
+    }
+  }
+  var sel = document.getElementById("city-select");
+  sel.addEventListener("change", function(){ showSurface(this.value); });
+  showSurface(sel.value);
+})();
+</script>
+')
+
+
+```
+
+
+\n
+
+## **Coût chauffage vs DPE**
+___
+Ici, on observe la relation entre l’étiquette énergétique et le coût de chauffage, ce qui aide à cibler les logements les plus énergivores et à prioriser les rénovations.
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+render_cout_chauf_vs_dpe <- function(df_city, suffix = "") {  
+chauffage_filtered <- df%>%
+    filter(!is.na(cout_chauffage) & cout_chauffage <= 5000)
+
+  print(
+    ggplot(chauffage_filtered, aes(x = etiquette_dpe, y = cout_chauffage, fill = ville)) +
+      geom_boxplot(alpha = 0.6, outlier.colour = "red", outlier.shape = 16, outlier.size = 1.5) +
+      scale_fill_manual(values = c("Nancy" = "#FF3333", "Montpellier" = "#FFD700")) +
+      coord_cartesian(ylim = c(0, 2000)) +
+      labs(title = paste0("Coût du chauffage selon l'étiquette DPE ", suffix),
+           x = "Étiquette DPE", y = "Coût chauffage (€)") +
+      theme_minimal(base_size = 14) +
+      theme(legend.position = "bottom")
+  )}
+```
+
+
+```{r message=FALSE, results='asis'}
+# ---------- BOTH ----------
+
+cat('<div id="plots-both-chauffage" style="display:none; margin-bottom:18px;">\n')
+render_cout_chauf_vs_dpe(df_both, suffix=" (Both)")
+
+cat("
+
+<div style='margin-top:12px; padding:12px; border-left:5px solid #005BAC; background:#FFFFFF;'>
+  <h4>🇫🇷 Analyse — Comparaison (Nancy & Montpellier)</h4>
+  <p><strong>Corrélation :</strong> Le DPE est un bon prédicteur du coût de chauffage ; cependant l'échelle varie selon le climat.</p>
+  <p><strong>Observation :</strong> Pour chaque classe DPE, le coût est systématiquement plus élevé à Nancy (climat plus froid) qu'à Montpellier.</p>
+  <p><strong>Conclusion :</strong> La classe DPE reste pertinente partout, mais le contexte climatique amplifie l'impact financier à Nancy. Prioriser les rénovations pour les classes D–G, en particulier à Nancy.</p>
+</div>")
+cat('</div>\n')
+
+# ---------- NANCY ----------
+
+cat('<div id="plots-nancy-chauffage" style="display:none; margin-bottom:18px;">\n')
+render_cout_chauf_vs_dpe(df_nancy, suffix=" (Nancy)")
+
+cat("
+
+<div style='margin-top:12px; padding:12px; border-left:5px solid #FF3333; background:#FFFFFF;'>
+  <h4>🇫🇷 Analyse — Nancy</h4>
+  <p><strong>Corrélation :</strong> Le DPE est un excellent prédicteur du coût de chauffage à Nancy.</p>
+  <p><strong>Coût (classe F/G) :</strong> Les classes les plus mauvaises affichent des médianes très élevées (≈ 1 100 €), soulignant l'urgence de la rénovation.</p>
+</div>")
+cat('</div>\n')
+
+# ---------- MONTPELLIER ----------
+
+cat('<div id="plots-mtp-chauffage" style="display:none; margin-bottom:18px;">\n')
+render_cout_chauf_vs_dpe(df_mtp, suffix=" (Montpellier)")
+
+cat("
+
+<div style='margin-top:12px; padding:12px; border-left:5px solid #FFD700; background:#FFFFFF;'>
+  <h4>🇫🇷 Analyse — Montpellier</h4>
+  <p><strong>Corrélation :</strong> La relation entre DPE et coût est nette mais l'échelle des coûts est significativement plus basse qu'à Nancy.</p>
+  <p><strong>Coût (classe F/G) :</strong> Les médianes sont modérées (≈ 750–850 €), ce qui reflète un climat plus doux et un parc plus récent.</p>
+</div>")
+cat("</div>\n")
+
+# JS: toggle plots Coût chauffage vs DPE
+
+cat('
+
+<script>
+(function(){
+  function showChauffage(val) {
+    var ids = ["plots-both-chauffage","plots-nancy-chauffage","plots-mtp-chauffage"];
+    ids.forEach(function(id){
+      var el = document.getElementById(id);
+      if(el) el.style.display="none";
+    });
+    if(val === "Nancy") {
+      var e = document.getElementById("plots-nancy-chauffage"); if(e) e.style.display="block";
+    } else if(val === "Montpellier") {
+      var e2 = document.getElementById("plots-mtp-chauffage"); if(e2) e2.style.display="block";
+    } else {
+      var e3 = document.getElementById("plots-both-chauffage"); if(e3) e3.style.display="block";
+    }
+  }
+  var sel = document.getElementById("city-select");
+  sel.addEventListener("change", function(){ showChauffage(this.value); });
+  showChauffage(sel.value); // init
+})();
+</script>
+
+')
+
+```
+\n
+
+## **Corrélation surface vs coût chauffage**
+___
+Ce graphique explore l’impact de la surface habitable sur le coût de chauffage, mettant en lumière comment taille et consommation énergétique interagissent.
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+render_nuage_plot <- function(df_city, suffix = "") {
+df_clean <- df%>%
+  filter(cout_chauffage < 5000,
+         !is.na(surface_habitable_logement),
+         !is.na(cout_chauffage))
+
+is_both <- length(unique(df_city$ville)) > 1
+
+print(ggplot(df_clean, aes(x = surface_habitable_logement,
+                           y = cout_chauffage, color = ville)) + geom_point(alpha = 0.4, size = 1.5) +
+
+    # CASE 1: BOTH CITIES SELECTED
+    {if (is_both) geom_smooth(
+        method = "lm", se = FALSE,
+        aes(color = ville),   
+        linetype = "solid", size = 1.2
+      )
+    } +
+
+    # CASE 2: ONE CITY SELECTED
+    {if (!is_both)
+      geom_smooth(
+        method = "lm", se = FALSE,
+        color = "#CC0000",   
+        linetype = "dashed", size = 1.3
+      )
+    } +
+
+    scale_color_manual(values = c(
+      "Nancy" = "#FF3333",
+      "Montpellier" = "#FFD700"
+    )) +
+
+    scale_x_continuous(limits = c(0, 300)) +
+    scale_y_continuous(limits = c(0, 3000)) +
+    labs(
+      title = paste0("Relation surface vs coût chauffage ", suffix),
+      x = "Surface habitable (m²)",
+      y = "Coût du chauffage (€)"
+    ) +
+    theme_minimal()
+)}
+```
+
+
+```{r message=FALSE, warning=FALSE, results='asis'}
+# ---------- BOTH ----------
+
+cat('<div id="plots-both-nuage" style="display:none; margin-bottom:18px;">\n')
+render_nuage_plot(df_both, suffix=" (Both)")
+
+cat('
+
+<div style="margin-top:12px; padding:12px; border-left:5px solid #005BAC; background:#FFFFFF;">
+  <h4>Analyse — Comparaison (Nancy & Montpellier)</h4>
+  <p>Le nuage de points montre que le coût du chauffage augmente généralement avec la surface habitable. Nancy présente des coûts plus élevés pour des surfaces similaires comparées à Montpellier.</p>
+  <ul>
+    <li><strong>Observation:</strong> Les tendances linéaires confirment l\'impact de la surface sur le coût du chauffage.</li>
+  </ul>
+</div>
+')
+cat('</div>\n')
+
+# ---------- NANCY ----------
+
+cat('<div id="plots-nancy-nuage" style="display:none; margin-bottom:18px;">\n')
+render_nuage_plot(df_nancy, suffix=" (Nancy)")
+
+cat('
+
+<div style="margin-top:12px; padding:12px; border-left:5px solid #FF3333; background:#FFFFFF;">
+  <h4>Analyse — Nancy</h4>
+  <p><strong>Résumé:</strong> À Nancy, le coût du chauffage augmente avec la surface. Les logements anciens et grands ont les coûts les plus élevés.</p>
+</div>
+')
+cat('</div>\n')
+
+# ---------- MONTPELLIER ----------
+
+cat('<div id="plots-mtp-nuage" style="display:none; margin-bottom:18px;">\n')
+render_nuage_plot(df_mtp, suffix=" (Montpellier)")
+
+cat('
+
+<div style="margin-top:12px; padding:12px; border-left:5px solid #FFD700; background:#FFFFFF;">
+  <h4>Analyse — Montpellier</h4>
+  <p><strong>Résumé:</strong> À Montpellier, le coût du chauffage reste modéré même pour des logements de grande surface, reflétant un parc immobilier plus récent et performant.</p>
+</div>
+')
+cat('</div>\n')
+
+# JS: toggle nuage plots
+
+cat('
+
+<script>
+(function(){
+  function showNuage(val) {
+    var ids = ["plots-both-nuage","plots-nancy-nuage","plots-mtp-nuage"];
+    ids.forEach(function(id){
+      var el = document.getElementById(id);
+      if(el) el.style.display="none";
+    });
+    if(val === "Nancy") {
+      var e = document.getElementById("plots-nancy-nuage"); if(e) e.style.display="block";
+    } else if(val === "Montpellier") {
+      var e2 = document.getElementById("plots-mtp-nuage"); if(e2) e2.style.display="block";
+    } else {
+      var e3 = document.getElementById("plots-both-nuage"); if(e3) e3.style.display="block";
+    }
+  }
+  var sel = document.getElementById("city-select");
+  sel.addEventListener("change", function(){ showNuage(this.value); });
+  showNuage(sel.value); // init
+})();
+</script>
+
+')
+
+```
+
+\n
+
+## **Répartition logements anciens / neufs**
+___
+Cette visualisation compare l’âge des logements, permettant de distinguer les bâtiments récents des plus anciens et d’anticiper les besoins en rénovation ou modernisation.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+render_type_log <- function(df_city, suffix = "") {
+df_city_clean <- df%>%
+  filter(!is.na(annee_construction)) %>%
+  mutate(cat_construction = ifelse(annee_construction < 1960, "Ancien", "Neuf"))
+
+construction_summary <- df_city_clean %>%
+  group_by(ville, cat_construction) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  group_by(ville) %>%
+  mutate(pct = n / sum(n) * 100)
+
+cities <- unique(df_city$ville)
+is_both <- length(cities) > 1
+
+if (!is_both) {
+
+  city <- cities
+  
+  if (city == "Nancy") {
+    fill_colors <- c(
+      "Ancien" = "#B0B0B0",   
+      "Neuf"   = "#FF3333"    
+    )
+  }
+  
+  if (city == "Montpellier") {
+    fill_colors <- c(
+      "Ancien" = "#B0B0B0",   
+      "Neuf"   = "#FFD700"    
+    )
+  }
+
+} else {
+  
+  fill_colors <- c(
+    # Nancy
+    "Nancy_Ancien" = "#8C8C8C",   
+    "Nancy_Neuf"   = "#FF3333",   
+    
+    # Montpellier
+    "Montpellier_Ancien" = "#D6D6D6", 
+    "Montpellier_Neuf"   = "#FFD700"  
+  )
+  
+  construction_summary <- construction_summary %>%
+    mutate(group = paste0(ville, "_", cat_construction))
+}
+
+
+print(
+  ggplot(
+    construction_summary,
+    aes(
+      x = ville,
+      y = pct,
+      fill = if (is_both) group else cat_construction
+    )
+  ) +
+    geom_bar(stat = "identity", position = "stack") +
+    scale_fill_manual(values = fill_colors) +
+    geom_text(
+      aes(label = paste0(round(pct, 1), "%")),
+      position = position_stack(vjust = 0.5),
+      color = "white", size = 3.5
+    ) +
+    labs(
+      title = paste0("Répartition logements anciens / neufs ", suffix),
+      x = "Ville", y = "% de logements"
+    ) +
+    theme_minimal(base_size = 14) +
+    theme(
+      axis.text.x = element_text(angle = 45, hjust = 1),
+      legend.title = element_blank()
+    )
+)
+
+}
+
+```
+
+
+```{r message=FALSE, results='asis'}
+# ---------- BOTH ----------
+
+cat('<div id="plots-both-type" style="display:none; margin-bottom:18px;">\n')
+render_type_log(df_both, suffix=" (Both)")
+
+cat('
+
+<div style="margin-top:12px; padding:12px; border-left:5px solid #005BAC; background:#FFFFFF;">
+  <h4>Analyse — Comparaison (Nancy & Montpellier)</h4>
+  <p>Le graphique montre la proportion de logements anciens (<1960) et neufs dans les deux villes. Nancy a une part plus importante de logements anciens par rapport à Montpellier.</p>
+  <ul>
+    <li><strong>Observation:</strong> Les logements anciens dominent à Nancy, alors que Montpellier a plus de constructions récentes.</li>
+  </ul>
+</div>
+')
+cat('</div>\n')
+
+# ---------- NANCY ----------
+
+cat('<div id="plots-nancy-type" style="display:none; margin-bottom:18px;">\n')
+render_type_log(df_nancy, suffix=" (Nancy)")
+
+cat('
+
+<div style="margin-top:12px; padding:12px; border-left:5px solid #FF3333; background:#FFFFFF;">
+  <h4>Analyse — Nancy</h4>
+  <p>À Nancy, la majorité des logements sont anciens (<1960), ce qui correspond à un parc immobilier énergivore nécessitant des rénovations.</p>
+</div>
+')
+cat('</div>\n')
+
+# ---------- MONTPELLIER ----------
+
+cat('<div id="plots-mtp-type" style="display:none; margin-bottom:18px;">\n')
+render_type_log(df_mtp, suffix=" (Montpellier)")
+
+cat('
+
+<div style="margin-top:12px; padding:12px; border-left:5px solid #FFD700; background:#FFFFFF;">
+  <h4>Analyse — Montpellier</h4>
+  <p>À Montpellier, la majorité des logements sont récents, le parc immobilier est moderne et performant énergétiquement.</p>
+</div>
+')
+cat('</div>\n')
+
+# JS: toggle plots Répartition logements anciens / neufs
+
+cat('
+
+<script>
+(function(){
+  function showType(val) {
+    var ids = ["plots-both-type","plots-nancy-type","plots-mtp-type"];
+    ids.forEach(function(id){
+      var el = document.getElementById(id);
+      if(el) el.style.display="none";
+    });
+    if(val === "Nancy") {
+      var e = document.getElementById("plots-nancy-type"); if(e) e.style.display="block";
+    } else if(val === "Montpellier") {
+      var e2 = document.getElementById("plots-mtp-type"); if(e2) e2.style.display="block";
+    } else {
+      var e3 = document.getElementById("plots-both-type"); if(e3) e3.style.display="block";
+    }
+  }
+  var sel = document.getElementById("city-select");
+  sel.addEventListener("change", function(){ showType(this.value); });
+  showType(sel.value); // init
+})();
+</script>
+
+')
+
+
+```
+
+
+
+___
+
+\n
+\n
+# **Conclusion**
+___
+L’analyse exhaustive des données immobilières et énergétiques révèle des disparités significatives entre les villes étudiées. À Nancy, le parc immobilier ancien présente une variabilité élevée et des besoins urgents de rénovation énergétique, tandis qu’à Montpellier, les logements sont en moyenne plus récents et mieux performants. L’intégration des indicateurs de surface habitable, de coût énergétique et de classe DPE permet non seulement de hiérarchiser les priorités en matière de rénovation, mais aussi de fournir une vision claire et actionable pour la planification urbaine et la transition énergétique.\n  
+
+Ce projet montre comment l’analyse méthodique des données permet de transformer l’information en décisions concrètes, tout en soulignant l’importance du contexte local (climat, âge du bâti) pour optimiser les politiques de logement et d’efficacité énergétique.
+
+
+
