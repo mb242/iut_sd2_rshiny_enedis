@@ -76,14 +76,14 @@ Interface type HUD futuriste avec fond personnalisé et charte graphique CSS
 - **Corrélogramme** 
 
 ### Niveau Expert
-- **Charte graphique CSS** personnalisée
+- **Charte graphique CSS** personnalisée et inséré dans **app.R**
 - **Authentification utilisateur** avec mots de passe (Identifiant : Anthony ; Mot de passe : SARDELLITTI)
 
 
 ## Démo
 
 ### Application en Ligne
-**URL de déploiement** : 
+**URL de déploiement** :  https://mbahoutche.shinyapps.io/Rshinyapp/
 
 ### Vidéo de Démonstration
 **YouTube** :
