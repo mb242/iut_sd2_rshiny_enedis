@@ -57,7 +57,7 @@ Les données proviennent de l'**ADEME** (Agence de l'Environnement et de la Maî
 - Tableau de bord avec **5 onglets thématiques**
 Interface type HUD futuriste avec fond personnalisé et charte graphique CSS
 
-- **3 KPI dynamiques** : Vue d'ensemble ,   Comparaisons détaillées , Corrélogramme , Carte intéractive , données
+- **3 KPI dynamiques** : Vue d'ensemble ,   Comparaisons détaillées , Evolution cumuléé , Carte intéractive , données
 
 - **5 types de graphiques intéracticfs et statiques** : histogramme, barres, boxplot, nuage de points , corrélogramme
 
