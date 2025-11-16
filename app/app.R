@@ -98,10 +98,9 @@ if ("X_geopoint" %in% names(df)) {
 # -------------------------------------------------------------------
 # 2. UI
 # -------------------------------------------------------------------
-# Expose le dossier images 'test' (logos + fond)
-# -> on met le même "prefix" que ce qui est utilisé dans les paths (test/ia.jpg, test/logo_...)
 
-addResourcePath("www",(" https://github.com/mb242/iut_sd2_rshiny_enedis/blob/main/app/www")) 
+addResourcePath("www", "www")
+
 
 
 
@@ -389,8 +388,9 @@ server <- function(input, output, session) {
     if (isTRUE(user_logged())) return(NULL)
     div(
       class = "login-overlay",
-      tags$img(src = "https://github.com/mb242/iut_sd2_rshiny_enedis/blob/main/app/www/logo_iut.jpg",    class = "brand-left",  alt = "IUT"),
-      tags$img(src = "https://github.com/mb242/iut_sd2_rshiny_enedis/blob/main/app/www/logo_enedis.jpg", class = "brand-right", alt = "Enedis"),
+      # CORRECTION : Utilisez les chemins locaux au lieu des URLs GitHub
+      tags$img(src = "www/logo_iut.jpg", class = "brand-left", alt = "IUT"),
+      tags$img(src = "www/logo_enedis.jpg", class = "brand-right", alt = "Enedis"),
         div(class = "auth-card",
             div(class = "auth-hero",
                 span(class = "tag", tagList(icon("bolt"), " OBSERVATOIRE DPE")),
@@ -709,6 +709,7 @@ write.csv(df, "logements_nancy_montpellier.csv.gz")
 # -------------------------------------------------------------------
 
 shinyApp(ui = ui, server = server)
+
 
 
 
