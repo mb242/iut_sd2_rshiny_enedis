@@ -192,5 +192,5 @@ Cette application permet de :
 ## Support
 
 Pour toute question :
-📩 **[admin@support.com](mailto:2018elkfred@gmail.com)**
+📩 **[admin@support.com](mailto:elk-fred.mbahouka@univ-lyon2.fr)**
 
