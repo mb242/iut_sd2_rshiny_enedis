@@ -183,7 +183,8 @@ Cette application permet de :
 * [📘 Dépôt GitHub](https://github.com/mb242/iut_sd2_rshiny_enedis/tree/main)
 * [📄 Documentation technique](https://github.com/mb242/iut_sd2_rshiny_enedis/tree/main/rapport)
 * [🔧 Code source](https://github.com/mb242/iut_sd2_rshiny_enedis/tree/main/docs)
-* [📊 Rapports complémentaires](https://github.com/mb242/iut_sd2_rshiny_enedis/tree/main/docs)
+* [📊 Rapports complémentaires](file:///C:/Users/ThiCamTienPHAM/OneDrive%20-%20AGENCE%20FRANCE%20LOCALE/01%20IUT/R_projet/script_rapport_statistique.html)
+* [🖥️ Rapports scripts](https://github.com/mb242/iut_sd2_rshiny_enedis/tree/main/docs)
 
 ---
 
