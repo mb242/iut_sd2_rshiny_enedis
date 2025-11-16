@@ -135,7 +135,6 @@ Interface type HUD futuriste avec fond personnalisé et charte graphique CSS
 - [Leaflet pour R](https://rstudio.github.io/leaflet/)
 - [Plotly R](https://plotly.com/r/)
 - [shinyauthr Guide](https://github.com/PaulC91/shinyauthr)
-- [sf Package](https://r-spatial.github.io/sf/)
 
 ---
 
