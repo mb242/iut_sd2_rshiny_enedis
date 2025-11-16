@@ -184,8 +184,8 @@ Cette application permet de :
 * [📄 Documentation fonctionnelle ](https://github.com/mb242/iut_sd2_rshiny_enedis/blob/main/docs/doc_fonctionnelle.md)
 * [📄 Documentation technique ](https://github.com/mb242/iut_sd2_rshiny_enedis/blob/main/docs/doc_technique.md)
 * [🔧 Code source shiny App](https://github.com/mb242/iut_sd2_rshiny_enedis/blob/main/app/app.R)
-* [🖥️ Rapport ](https://github.com/mb242/iut_sd2_rshiny_enedis/blob/main/rapport/rapport_statistique.html)
-* [📊 Rapports complémentaires](https://github.com/mb242/iut_sd2_rshiny_enedis/blob/main/rapport/rapport_statistique.Rmd)
+* [🖥️ Rapport ](https://github.com/mb242/iut_sd2_rshiny_enedis/blob/main/rapport/rapport_statistique.Rmd) 
+* [📊 Rapports complémentaires](https://github.com/mb242/iut_sd2_rshiny_enedis/blob/main/rapport/rapport_statistique.html)
 
 ---
 
