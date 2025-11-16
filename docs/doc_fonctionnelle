@@ -1,0 +1,136 @@
+---
+title: "Documentation Fonctionnelle – Observations DPE"
+author: "MBAHOUKA Elk-Fred, TCHETCHE Aristide et PHAM Thi Cam Tien"
+date: "`r format(Sys.time(), '%d/%m/%Y')`"
+output:
+  md_document:
+    variant: gfm
+---
+
+# Documentation Fonctionnelle – Observations DPE
+
+## Accès à l'application
+
+**Lien d'accès :** Lien Shinyapps  
+**Identifiants nécessaires :**  
+- Nom d'utilisateur : Anthony  
+- Mot de passe : SARDELLITTI  
+
+---
+
+# Introduction & Contexte
+
+Bienvenue dans l’application **Observations DPE – Analyse et Visualisation**.
+
+Cette application permet d'explorer les diagnostics DPE des logements des villes de **Nancy** et **Montpellier** de manière intuitive et interactive.
+
+## Objectifs principaux
+
+- Fournir un aperçu global des données via indicateurs clés et graphiques synthétiques.  
+- Permettre la comparaison entre variables et étiquettes DPE.  
+- Explorer les relations entre consommation, émissions et caractéristiques des logements.  
+- Offrir une visualisation spatiale (carte interactive).  
+- Exporter graphiques et données pour analyses externes.
+
+## À propos des données
+
+- **Volumes :** ~5000 logements à Nancy, ~4000 à Montpellier.  
+- **Types :** maisons individuelles, appartements, bâtiments collectifs.  
+- **Variables :** surface, consommation énergétique (kWh/m²/an), émissions CO2 (kg/m²/an), étiquette DPE (A à G), géolocalisation.
+
+💡 **Commencez par la page d'accueil pour visualiser les KPI principaux.**
+
+---
+
+# Page d'accueil – Indicateurs clés (KPI)
+
+La page d'accueil affiche trois KPI :
+
+### 🏘️ Total logements analysés  
+Nombre total de logements pris en compte.
+
+### 🔥 Logements "passoires énergétiques" (E, F, G)  
+Logements très énergivores.
+
+### ⚡ Consommation énergétique moyenne  
+Moyenne de consommation (kWh/m²/an).
+
+### Fonctionnalités supplémentaires  
+- Panneau de filtres (ville, année, étiquette DPE, etc.)  
+- Toutes les visualisations s’adaptent aux filtres  
+
+💡 **Filtrer par ville ou période accélère le rendu.**
+
+---
+
+# Structure des onglets
+
+L’application comprend **5 onglets principaux**.
+
+## 📊 Onglet 1 — Vue d’ensemble  
+- Graphiques récapitulatifs (interactifs et statistiques).  
+- Export PNG disponible.  
+💡 Survolez les barres pour obtenir les détails.
+
+## ⚖️ Onglet 2 — Comparaison  
+- **Boxplots** selon étiquettes DPE  
+- **Nuages de points** + corrélations  
+- **Régression linéaire** : choix des variables X/Y, équation, R²  
+
+💡 Utilisez les filtres sur grands datasets.
+
+## 🔗 Onglet 3 — Évolution cumulée  
+- Évolution cumulée du coût et de la consommation selon l'année DPE.  
+- Analyse du chauffage, de l'éclairage et de la consommation 5 usages.
+
+## 🗺️ Onglet 4 — Carte interactive  
+- Répartition des logements par ville  
+- Visualisation des étiquettes DPE  
+- Identification des zones performantes / à risque
+
+## 📑 Onglet 5 — Données  
+- Tableau dynamique filtrable  
+- Adresses, caractéristiques, diagnostics, consommations, émissions  
+- Accès aux données brutes
+
+---
+
+# Fonctionnement des filtres
+
+Les filtres influencent **tous les onglets simultanément**.
+
+Filtres disponibles :  
+- Ville  
+- Période de construction  
+- Étiquette DPE  
+- Type d’énergie de chauffage (Bois-bûches, granulés, électricité…)
+
+💡 **Combiner plusieurs filtres = analyses plus précises + rapidité.**
+
+---
+
+# Résumé des apports
+
+L'application permet de :
+
+- Explorer les diagnostics DPE de manière interactive  
+- Identifier les logements énergivores  
+- Comparer les consommations et corrélations  
+- Visualiser spatialement la performance énergétique  
+- Exporter graphiques et données
+
+---
+
+# 🔗 Liens utiles
+
+- Dépôt GitHub (code & README)  
+- Fichier RMarkdown  
+- Documentation technique  
+- Documentation fonctionnelle  
+
+---
+
+# 💬 Support
+
+Pour toute question ou problème :  
+📩 **admin@support.com**
